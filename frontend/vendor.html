@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Vendor Command Center</title>
+<link rel="stylesheet" href="shared/base.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="vendor-theme" data-page="dashboard">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" style="border-radius:50%;">F</div>
+      <div class="brand-text"><div class="name">FarmLink AI</div><div class="tag">Vendor Command Center</div></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Operations</div>
+      <a class="nav-item active" data-sec="dashboard" href="#"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+      <a class="nav-item" data-sec="farmerMarket" href="#"><i data-lucide="store"></i><span>Farmer Marketplace</span></a>
+      <a class="nav-item" data-sec="procurement" href="#"><i data-lucide="shopping-cart"></i><span>Procurement</span></a>
+      <a class="nav-item" data-sec="inventory" href="#"><i data-lucide="boxes"></i><span>Inventory</span><span class="count" id="invCount">0</span></a>
+      <a class="nav-item" data-sec="orders" href="#"><i data-lucide="clipboard-list"></i><span>Orders</span></a>
+      <a class="nav-item" data-sec="logistics" href="#"><i data-lucide="truck"></i><span>Logistics</span></a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Business</div>
+      <a class="nav-item" data-sec="consumerOrders" href="#"><i data-lucide="shopping-bag"></i><span>Consumer Orders</span></a>
+      <a class="nav-item" data-sec="payments" href="#"><i data-lucide="indian-rupee"></i><span>Payments</span></a>
+      <a class="nav-item" data-sec="analytics" href="#"><i data-lucide="bar-chart-3"></i><span>Analytics</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar-chip">VN</div>
+      <div><div class="who">Vendor</div><div class="sub">Verified business account</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <div>
+          <h1 id="pageHeading">Good afternoon, Vendor.</h1>
+          <div class="text-faint" style="font-size:12.5px;" id="pageSub">Source smarter. Move faster. Sell directly.</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="vendorLangBtn" title="Language" style="width:auto;padding:0 12px;font-weight:800;font-size:12px;"><i data-lucide="languages" style="margin-right:5px;"></i>EN</button>
+        <button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn"><i data-lucide="user"></i></button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section id="sec-dashboard">
+      <div class="grid grid-4">
+        <div class="stat-card"><div class="label">Procurement this month<i data-lucide="indian-rupee"></i></div><div class="value">₹4.82L</div><div class="sub up">+12.8% vs last month</div></div>
+        <div class="stat-card"><div class="label">Active farmer suppliers<i data-lucide="users"></i></div><div class="value">38</div><div class="sub up">+6 verified this month</div></div>
+        <div class="stat-card"><div class="label">Inventory available<i data-lucide="boxes"></i></div><div class="value">18.6T</div><div class="sub" style="color:#38bdf8;">Healthy stock position</div></div>
+        <div class="stat-card"><div class="label">Logistics saved<i data-lucide="truck"></i></div><div class="value">₹38.4K</div><div class="sub">Estimated route savings</div></div>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-head"><div><h3>Market Demand Intelligence</h3><p>AI-assisted demand outlook for your procurement</p></div><a class="link" href="#" onclick="switchSection('analytics')">VIEW DETAILS →</a></div>
+          <svg viewBox="0 0 760 240" style="width:100%;height:210px;">
+            <g stroke="var(--border)" stroke-width="1"><line x1="0" y1="20" x2="760" y2="20"/><line x1="0" y1="60" x2="760" y2="60"/><line x1="0" y1="100" x2="760" y2="100"/><line x1="0" y1="140" x2="760" y2="140"/><line x1="0" y1="180" x2="760" y2="180"/><line x1="0" y1="215" x2="760" y2="215"/></g>
+            <path d="M20,190 L130,195 L240,205 L350,175 L460,150 L570,125 L680,95" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M20,190 L130,180 L240,185 L350,160 L460,165 L570,150 L680,145" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 6"/>
+            <g fill="var(--accent)"><circle cx="20" cy="190" r="4"/><circle cx="130" cy="195" r="4"/><circle cx="240" cy="205" r="4"/><circle cx="350" cy="175" r="4"/><circle cx="460" cy="150" r="4"/><circle cx="570" cy="125" r="4"/><circle cx="680" cy="95" r="4"/></g>
+            <g fill="var(--text-faint)" font-size="11.5"><text x="10" y="232">Sep 09</text><text x="115" y="232">Sep 10</text><text x="225" y="232">Sep 11</text><text x="335" y="232">Sep 12</text><text x="445" y="232">Sep 13</text><text x="555" y="232">Sep 14</text><text x="660" y="232">Sep 15</text></g>
+          </svg>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>AI Procurement Suggestions</h3><p>What may be worth sourcing next</p></div><i data-lucide="sparkles" style="color:var(--accent-text);"></i></div>
+          <div class="flex gap-8" style="margin-bottom:12px;"><div class="row-icon" style="background:var(--accent-soft);">✨</div>
+            <div><div class="row-title">Demand is shifting this week</div><div class="row-sub">Stronger buyer activity around selected vegetables and pulses.</div></div>
+          </div>
+          <div id="suggestionsWrap"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-head"><div><h3>Recommended Farmer Suppliers</h3><p>Matched using your procurement needs</p></div><a class="link" href="#" onclick="switchSection('farmerMarket')">VIEW ALL →</a></div>
+          <div id="suppliersWrap"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Logistics Command</h3><p>Live procurement movement</p></div><a class="link" href="#" onclick="switchSection('logistics')">OPTIMIZE →</a></div>
+          <div class="row-item"><div class="row-left"><div class="row-icon">🚜</div><div><div class="row-title">Farmer pickup</div><div class="row-sub">2.4T Tomato • Pickup scheduled</div></div></div><span class="badge badge-green">READY</span></div>
+          <div class="row-item"><div class="row-left"><div class="row-icon">🚚</div><div><div class="row-title">In transit</div><div class="row-sub">4.8T Soybean • ETA 2h 15m</div></div></div><span class="badge badge-blue">MOVING</span></div>
+          <div class="row-item"><div class="row-left"><div class="row-icon">🏭</div><div><div class="row-title">Vendor warehouse</div><div class="row-sub">Receiving dock • Slot 02</div></div></div><span class="badge badge-green">READY</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head"><div><h3>Procurement Orders</h3><p>Recent direct purchases from farmers</p></div><a class="link" href="#" onclick="switchSection('procurement')">ALL ORDERS →</a></div>
+        <div id="procOrdersWrap"></div>
+      </div>
+    </section>
+
+    <!-- FARMER MARKETPLACE -->
+    <section id="sec-farmerMarket" style="display:none;">
+
+      <div class="page-card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div>
+            <h3>Connection Requests</h3>
+            <p>Farmers interested in your buyer requirements</p>
+          </div>
+        </div>
+
+        <div id="connectionRequestsWrap">
+          <div class="row-item">
+            <span class="text-faint">Loading requests...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input
+          class="search-box"
+          id="farmerSearch"
+          placeholder="Search farmer lots..."
+          style="max-width:280px;">
+      </div>
+
+      <div class="grid grid-3" id="farmerLotsWrap"></div>
+
+    </section>
+
+    <!-- PROCUREMENT -->
+    <section id="sec-procurement" style="display:none;">
+      <div class="page-card card">
+        <div class="card-head"><h3>Create procurement request</h3></div>
+        <form id="procForm" class="field-row">
+          <div class="field"><label>Crop</label><select name="crop"><option>Tomato</option><option>Onion</option><option>Soybean</option><option>Potato</option></select></div>
+          <div class="field"><label>Quantity needed (kg)</label><input name="qty" type="number" placeholder="2000" required></div>
+        </form>
+        <button class="btn btn-primary" onclick="submitProcurement()"><i data-lucide="plus"></i> Post requirement to farmers</button>
+      </div>
+      <div class="card" style="margin-top:16px;"><div class="card-head"><h3>Procurement orders</h3></div><div id="procOrdersWrap2"></div></div>
+    </section>
+
+    <!-- INVENTORY -->
+    <section id="sec-inventory" style="display:none;">
+      <div class="card"><div class="card-head"><h3>Current inventory</h3><span class="badge badge-green">Healthy stock</span></div><div id="inventoryWrap"></div></div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="sec-orders" style="display:none;">
+      <div class="card"><div class="card-head"><h3>All procurement orders</h3></div><div id="procOrdersWrap3"></div></div>
+    </section>
+
+    <!-- LOGISTICS -->
+    <section id="sec-logistics" style="display:none;">
+      <div class="grid grid-3">
+        <div class="stat-card"><div class="label">Active shipments<i data-lucide="truck"></i></div><div class="value">3</div></div>
+        <div class="stat-card"><div class="label">On-time rate<i data-lucide="clock"></i></div><div class="value">96%</div></div>
+        <div class="stat-card"><div class="label">Route savings<i data-lucide="indian-rupee"></i></div><div class="value">₹38.4K</div></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="row-item"><div class="row-left"><div class="row-icon">🚜</div><div><div class="row-title">Farmer pickup</div><div class="row-sub">2.4T Tomato • Pickup scheduled</div></div></div><span class="badge badge-green">READY</span></div>
+        <div class="row-item"><div class="row-left"><div class="row-icon">🚚</div><div><div class="row-title">In transit</div><div class="row-sub">4.8T Soybean • ETA 2h 15m</div></div></div><span class="badge badge-blue">MOVING</span></div>
+        <div class="row-item"><div class="row-left"><div class="row-icon">🏭</div><div><div class="row-title">Vendor warehouse</div><div class="row-sub">Receiving dock • Slot 02</div></div></div><span class="badge badge-green">READY</span></div>
+      </div>
+    </section>
+
+    <!-- CONSUMER ORDERS -->
+    <section id="sec-consumerOrders" style="display:none;">
+      <div class="card"><div class="card-head"><h3>Orders from consumers</h3></div>
+        <div class="row-item"><div class="row-left"><div class="row-icon">🛍️</div><div><div class="row-title">Order #FL-C2841</div><div class="row-sub">2kg Fresh Tomato • In transit</div></div></div><span class="badge badge-blue">In transit</span></div>
+        <div class="row-item"><div class="row-left"><div class="row-icon">🛍️</div><div><div class="row-title">Order #FL-C2839</div><div class="row-sub">1kg Fresh Apples • Delivered</div></div></div><span class="badge badge-green">Delivered</span></div>
+      </div>
+    </section>
+
+    <!-- PAYMENTS -->
+    <section id="sec-payments" style="display:none;">
+      <div class="grid grid-3">
+        <div class="stat-card"><div class="label">Paid to farmers<i data-lucide="indian-rupee"></i></div><div class="value">₹3.9L</div></div>
+        <div class="stat-card"><div class="label">Revenue from consumers<i data-lucide="wallet"></i></div><div class="value">₹6.2L</div></div>
+        <div class="stat-card"><div class="label">Margin this month<i data-lucide="trending-up"></i></div><div class="value">21.4%</div></div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <section id="sec-analytics" style="display:none;">
+      <div class="card"><div class="card-head"><h3>Demand trend — all categories</h3></div>
+        <svg viewBox="0 0 760 220" style="width:100%;height:200px;">
+          <path d="M20,180 L130,160 L240,170 L350,120 L460,100 L570,80 L680,60" fill="none" stroke="var(--accent)" stroke-width="3"/>
+        </svg>
+        <p class="text-faint" style="font-size:12px;">Demo analytics — connects to live transaction data in a future phase.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="shared/shared.js"></script>
+<script>
+const PAGE_META = {
+  dashboard:{h:'Good afternoon, Vendor.', s:'Source smarter. Move faster. Sell directly.'},
+  farmerMarket:{h:'Farmer Marketplace', s:'Browse available lots from verified farmers'},
+  procurement:{h:'Procurement', s:'Create and track sourcing requests'},
+  inventory:{h:'Inventory', s:'Your current stock across categories'},
+  orders:{h:'Orders', s:'All procurement orders'},
+  logistics:{h:'Logistics', s:'Live movement of goods'},
+  consumerOrders:{h:'Consumer Orders', s:'Orders placed by consumers on your storefront'},
+  payments:{h:'Payments', s:'Revenue, payouts and margins'},
+  analytics:{h:'Analytics', s:'Demand and performance trends'},
+};
+function switchSection(id){
+  document.querySelectorAll('main section').forEach(s => s.style.display = 'none');
+  document.getElementById('sec-'+id).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.querySelector(`.nav-item[data-sec="${id}"]`);
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('pageHeading').textContent = PAGE_META[id].h;
+  document.getElementById('pageSub').textContent = PAGE_META[id].s;
+  flCloseMobileMenu();
+}
+document.querySelectorAll('.nav-item[data-sec]').forEach(el => {
+  el.addEventListener('click', e => { e.preventDefault(); switchSection(el.dataset.sec); });
+});
+
+const SUGGESTIONS = [
+  {emoji:'🍅', crop:'Tomato', sub:'High demand • 5 farmer lots nearby', price:'₹28/kg', trend:'↑ Rising'},
+  {emoji:'🫘', crop:'Soybean', sub:'Bulk requirement • 8.2T available', price:'₹52/kg', trend:'↑ Strong'},
+  {emoji:'🧅', crop:'Onion', sub:'Stable demand • 12 farmer lots', price:'₹31/kg', trend:'→ Stable'},
+];
+document.getElementById('suggestionsWrap').innerHTML = SUGGESTIONS.map(s => `
+  <div class="row-item"><div class="row-left"><div class="row-icon">${s.emoji}</div><div><div class="row-title">${s.crop}</div><div class="row-sub">${s.sub}</div></div></div>
+  <div class="row-right"><b>${s.price}</b><div class="text-faint" style="font-size:11px;">${s.trend}</div></div></div>`).join('');
+
+const SUPPLIERS = [
+  {code:'FP', name:'Farmer Producer Group', sub:'Tomato • 2.4T • 18 km away'},
+  {code:'FO', name:'Farmer Organic Lot', sub:'Soybean • 4.8T • 26 km away'},
+  {code:'FG', name:'Fresh Grower Network', sub:'Onion • 3.1T • 34 km away'},
+  {code:'FV', name:'Verified Farm Lot', sub:'Potato • 1.8T • 41 km away'},
+];
+function renderSuppliers(){
+  document.getElementById('suppliersWrap').innerHTML = SUPPLIERS.map(s => `
+    <div class="row-item"><div class="row-left"><div class="row-icon">${s.code}</div><div><div class="row-title">${s.name}</div><div class="row-sub">${s.sub}</div></div></div>
+    <button class="btn btn-ghost btn-sm" onclick="contactSupplier('${s.name}')">Contact</button></div>`).join('');
+}
+function contactSupplier(name){ flToast(`Contact request sent to ${name}`); }
+renderSuppliers();
+
+async function renderProcOrders() {
+
+  const containers = [
+    'procOrdersWrap',
+    'procOrdersWrap2',
+    'procOrdersWrap3'
+  ];
+
+  try {
+
+    const response = await fetch(
+      'http://localhost:5000/api/orders'
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to load orders');
+    }
+
+    const orders = data.orders || [];
+
+    const badgeClass = {
+      ACTION: 'badge-orange',
+      CONFIRMED: 'badge-green',
+      IN_TRANSIT: 'badge-blue',
+      DELIVERED: 'badge-green',
+      CANCELLED: 'badge-gray'
+    };
+
+    const html = orders.map(order => {
+
+      const item = order.items?.[0];
+
+      const isPaid = order.paymentStatus === 'PAID';
+
+      return `
+        <div class="row-item">
+
+          <div class="row-left">
+
+            <div class="row-icon">📋</div>
+
+            <div>
+
+              <div class="row-title">
+                ${order.orderNumber}
+                • ${order.farmerId?.name || 'Farmer'}
+              </div>
+
+              <div class="row-sub">
+                ${item?.crop || 'Crop'}
+                • ${Number(order.quantityKg || 0).toLocaleString()} kg
+                • ₹${Number(order.agreedPrice || 0).toLocaleString()}/q
+                • Total ₹${Number(order.totalAmount || 0).toLocaleString()}
+              </div>
+
+            </div>
+
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;">
+
+            <span class="badge ${
+              isPaid
+                ? 'badge-green'
+                : badgeClass[order.orderStatus] || 'badge-gray'
+            }">
+              ${isPaid ? 'PAID' : order.orderStatus}
+            </span>
+
+            ${
+              !isPaid && order.paymentStatus === 'PENDING'
+                ? `
+                  <button
+                    class="btn btn-primary btn-sm"
+                    onclick="payForOrder('${order._id}')">
+                    Pay ₹${Number(order.totalAmount || 0).toLocaleString()}
+                  </button>
+                `
+                : ''
+            }
+
+          </div>
+
+        </div>
+      `;
+
+    }).join('');
+
+    const output = html ||
+      '<div class="empty-state">No procurement orders yet.</div>';
+
+    containers.forEach(id => {
+
+      const element = document.getElementById(id);
+
+      if (element) {
+        element.innerHTML = output;
+      }
+
+    });
+
+  } catch (error) {
+
+    console.error('Orders loading failed:', error);
+
+    containers.forEach(id => {
+
+      const element = document.getElementById(id);
+
+      if (element) {
+        element.innerHTML =
+          '<div class="empty-state">Unable to load orders.</div>';
+      }
+
+    });
+
+  }
+}
+
+async function payForOrder(orderId) {
+
+  try {
+
+    const ordersResponse = await fetch(
+      'http://localhost:5000/api/orders'
+    );
+
+    const ordersData = await ordersResponse.json();
+
+    const order = (ordersData.orders || [])
+      .find(o => o._id === orderId);
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    if (order.paymentStatus === 'PAID') {
+      flToast('This order is already paid');
+      return;
+    }
+
+    const paymentResponse = await fetch(
+      'http://localhost:5000/api/payments',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+
+          orderId: order._id,
+
+          payerId: order.buyerId?._id,
+
+          receiverId: order.farmerId?._id,
+
+          amount: order.totalAmount,
+
+          currency: 'INR',
+
+          type: 'PURCHASE',
+
+          status: 'PAID',
+
+          paymentMethod: 'UPI',
+
+          transactionReference:
+            'FL-TXN-' + Date.now(),
+
+          paidAt: new Date()
+
+        })
+      }
+    );
+
+    const paymentData =
+      await paymentResponse.json();
+
+    if (!paymentData.success) {
+      throw new Error(
+        paymentData.message || 'Payment failed'
+      );
+    }
+
+    const orderResponse = await fetch(
+      `http://localhost:5000/api/orders/${orderId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          paymentStatus: 'PAID'
+        })
+      }
+    );
+
+    const orderData = await orderResponse.json();
+
+    if (!orderData.success) {
+      throw new Error(
+        orderData.message || 'Failed to update order'
+      );
+    }
+
+    flToast(
+      `Payment successful — ${order.orderNumber}`
+    );
+
+    await renderProcOrders();
+
+  } catch (error) {
+
+    console.error('Payment failed:', error);
+
+    flToast(
+      error.message || 'Could not process payment',
+      'error'
+    );
+
+  }
+}
+
+function submitProcurement(){
+  const form = document.getElementById('procForm');
+  if (!form.qty.value){ flToast('Enter a quantity', 'error'); return; }
+  const orders = flStore.get('vendor-proc-orders', FL_DEFAULT_PROC_ORDERS);
+  orders.unshift({ id:'PO-'+Math.floor(Math.random()*900+100), farmer:'Matching farmers...', detail:`${form.qty.value} kg ${form.crop.value} requested`, status:'PENDING' });
+  flStore.set('vendor-proc-orders', orders);
+  flToast('Procurement request posted to matching farmers');
+  renderProcOrders();
+  form.qty.value = '';
+}
+renderProcOrders();
+
+const INVENTORY = [
+  {name:'Tomato', qty:'4.2T', status:'Healthy'}, {name:'Onion', qty:'3.8T', status:'Healthy'},
+  {name:'Soybean', qty:'6.1T', status:'Surplus'}, {name:'Potato', qty:'2.4T', status:'Low'},
+  {name:'Wheat', qty:'2.1T', status:'Healthy'},
+];
+document.getElementById('inventoryWrap').innerHTML = INVENTORY.map(i => `
+  <div class="row-item"><span class="row-title">${i.name}</span><b>${i.qty}</b>
+  <span class="badge ${i.status==='Low'?'badge-orange':i.status==='Surplus'?'badge-blue':'badge-green'}">${i.status}</span></div>`).join('');
+document.getElementById('invCount').textContent = INVENTORY.length;
+
+let FARMER_LOTS = [];
+let CONNECTIONS = [];
+
+const VENDOR_ID = '6aa97528eed85e71d300651a';
+
+async function loadFarmerMarketplace() {
+
+  try {
+
+    const [listingsResponse, connectionsResponse] = await Promise.all([
+      fetch('http://localhost:5000/api/listings'),
+      fetch('http://localhost:5000/api/connections')
+    ]);
+
+    const listingsData = await listingsResponse.json();
+    const connectionsData = await connectionsResponse.json();
+
+    if (!listingsData.success) {
+      throw new Error('Failed to load farmer listings');
+    }
+
+    if (!connectionsData.success) {
+      throw new Error('Failed to load connections');
+    }
+
+    FARMER_LOTS = listingsData.listings || [];
+
+    CONNECTIONS = (connectionsData.connections || [])
+      .filter(c => c.buyerId?._id === VENDOR_ID);
+
+    renderFarmerLots();
+    renderConnectionRequests();
+
+  } catch (error) {
+
+    console.error('Farmer marketplace loading failed:', error);
+
+    document.getElementById('farmerLotsWrap').innerHTML =
+      '<div class="empty-state">Unable to load farmer listings.</div>';
+
+    document.getElementById('connectionRequestsWrap').innerHTML =
+      '<div class="row-item"><span class="text-faint">Unable to load connection requests.</span></div>';
+  }
+}
+
+
+function renderFarmerLots() {
+
+  const q =
+    (document.getElementById('farmerSearch').value || '')
+      .toLowerCase();
+
+  const list = FARMER_LOTS.filter(l =>
+    (l.crop || '').toLowerCase().includes(q) ||
+    (l.farmerId?.name || '').toLowerCase().includes(q)
+  );
+
+  document.getElementById('farmerLotsWrap').innerHTML =
+    list.map(l => `
+
+      <div class="card">
+
+        <div class="row-title" style="font-size:15px;">
+          ${l.crop}
+        </div>
+
+        <div class="row-sub">
+          ${l.farmerId?.name || 'Farmer'}
+        </div>
+
+        <div class="row-item" style="padding:6px 0;">
+          <span class="text-faint">Quantity</span>
+          <b>${Number(l.quantityKg).toLocaleString()} kg</b>
+        </div>
+
+        <div class="row-item" style="padding:6px 0;">
+          <span class="text-faint">Quality</span>
+          <b>${l.quality}</b>
+        </div>
+
+        <div class="row-item" style="padding:6px 0;">
+          <span class="text-faint">Price</span>
+          <b>₹${Number(l.askingPricePerQuintal).toLocaleString()}/q</b>
+        </div>
+
+      </div>
+
+    `).join('') ||
+    '<div class="empty-state">No farmer listings found.</div>';
+}
+
+
+function renderConnectionRequests() {
+
+  const wrap = document.getElementById('connectionRequestsWrap');
+
+  if (!CONNECTIONS.length) {
+    wrap.innerHTML = `
+      <div class="row-item">
+        <span class="text-faint">
+          No connection requests yet.
+        </span>
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = CONNECTIONS.map(c => {
+
+    const farmerName = c.farmerId?.name || 'Farmer';
+    const listing = c.listingId;
+
+    return `
+      <div class="row-item">
+
+        <div class="row-left">
+
+          <div class="row-icon">🌾</div>
+
+          <div>
+            <div class="row-title">
+              ${farmerName}
+            </div>
+
+            <div class="row-sub">
+              ${listing?.crop || 'Crop'} •
+              ${listing?.quantityKg
+                ? Number(listing.quantityKg).toLocaleString() + ' kg'
+                : 'Quantity unavailable'}
+              • ${listing?.quality || 'Quality unavailable'}
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;">
+
+          <span class="badge ${
+            c.status === 'ACCEPTED'
+              ? 'badge-green'
+              : c.status === 'REJECTED'
+                ? 'badge-gray'
+                : 'badge-orange'
+          }">
+            ${c.status}
+          </span>
+
+          ${
+            c.status === 'REQUESTED'
+              ? `
+                <button
+                  class="btn btn-primary btn-sm"
+                  onclick="acceptConnection('${c._id}')">
+                  Accept
+                </button>
+              `
+              : ''
+          }
+
+        </div>
+
+      </div>
+    `;
+
+  }).join('');
+}
+
+
+async function acceptConnection(connectionId) {
+
+  const connection = CONNECTIONS.find(
+    c => c._id === connectionId
+  );
+
+  if (!connection) {
+    flToast('Connection not found', 'error');
+    return;
+  }
+
+  const listing = connection.listingId;
+
+  if (!listing) {
+    flToast('Farmer listing not found', 'error');
+    return;
+  }
+
+  try {
+
+    const quantityKg = Math.min(
+      Number(listing.quantityKg),
+      Number(connection.requirementId?.requiredQuantityKg || listing.quantityKg)
+    );
+
+    const pricePerQuintal =
+      Number(listing.askingPricePerQuintal);
+
+    const subtotal =
+      (quantityKg / 100) * pricePerQuintal;
+
+    const orderResponse = await fetch(
+      'http://localhost:5000/api/orders',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+
+          orderNumber: 'FL-' + Date.now(),
+
+          farmerId: connection.farmerId?._id,
+
+          buyerId: connection.buyerId?._id,
+
+          listingId: listing._id,
+
+          items: [
+            {
+              crop: listing.crop,
+              quantityKg: quantityKg,
+              pricePerQuintal: pricePerQuintal
+            }
+          ],
+
+          quantityKg: quantityKg,
+
+          agreedPrice: pricePerQuintal,
+
+          subtotal: subtotal,
+
+          deliveryFee: 0,
+
+          totalAmount: subtotal,
+
+          orderStatus: 'CONFIRMED',
+
+          paymentStatus: 'PENDING',
+
+          pickupLocation: 'Chhatrapati Sambhaji Nagar',
+
+          deliveryLocation:
+            connection.requirementId?.region || 'Maharashtra'
+
+        })
+      }
+    );
+
+    const orderData = await orderResponse.json();
+
+    if (!orderData.success) {
+      throw new Error(
+        orderData.message || 'Failed to create order'
+      );
+    }
+
+
+    const connectionResponse = await fetch(
+      `http://localhost:5000/api/connections/${connectionId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'ACCEPTED'
+        })
+      }
+    );
+
+    const connectionData =
+      await connectionResponse.json();
+
+    if (!connectionData.success) {
+      throw new Error(
+        connectionData.message ||
+        'Failed to accept connection'
+      );
+    }
+
+
+    flToast(
+      `Order ${orderData.order.orderNumber} created successfully`
+    );
+
+    await loadFarmerMarketplace();
+
+  } catch (error) {
+
+    console.error('Accept connection failed:', error);
+
+    flToast(
+      error.message || 'Could not accept connection',
+      'error'
+    );
+  }
+}
+
+
+document
+  .getElementById('farmerSearch')
+  .addEventListener('input', renderFarmerLots);
+
+loadFarmerMarketplace();
+
+let vendorLang = 0;
+const VLANGS = ['EN','HI','MR'];
+document.getElementById('vendorLangBtn').addEventListener('click', function(){
+  vendorLang = (vendorLang+1) % 3;
+  this.innerHTML = '<i data-lucide="languages" style="margin-right:5px;"></i>' + VLANGS[vendorLang];
+  if (window.lucide) lucide.createIcons();
+  flToast('Language preference saved: ' + VLANGS[vendorLang]);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>FarmLink AI — Route Optimizer</title>
+
+  <link rel="stylesheet" href="../shared/base.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- LEAFLET -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
+
+  <!-- INTER -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+
+    /* ==========================================================
+       ROUTE OPTIMIZER — PAGE UI
+    ========================================================== */
+
+    .route-map-wrap{
+      position:relative;
+      margin-top:16px;
+    }
+
+    .route-map{
+      width:100%;
+      height:450px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid var(--border);
+      background:var(--surface-2);
+    }
+
+    /* ---------- Origin ---------- */
+
+    .route-origin-box{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px;
+      margin-top:8px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:14px;
+    }
+
+    .route-origin-icon{
+      width:42px;
+      height:42px;
+      flex:0 0 42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:11px;
+      background:var(--accent-soft);
+      color:var(--accent-text);
+    }
+
+    .route-origin-icon svg{
+      width:19px;
+      height:19px;
+    }
+
+    .route-origin-content{
+      min-width:0;
+      flex:1;
+    }
+
+    .route-origin-title{
+      font-size:13px;
+      font-weight:800;
+      color:var(--text);
+    }
+
+    .route-origin-sub{
+      margin-top:2px;
+      font-size:11.5px;
+      color:var(--text-faint);
+    }
+
+    .route-origin-btn{
+      flex-shrink:0;
+      padding:9px 13px;
+      font-size:12px;
+      border-radius:9px;
+    }
+
+    /* ---------- Destination ---------- */
+
+    .route-select-wrap{
+      position:relative;
+      margin-top:8px;
+    }
+
+    .route-select-wrap::after{
+      content:"";
+      position:absolute;
+      right:15px;
+      top:50%;
+      width:8px;
+      height:8px;
+      border-right:2px solid var(--text-faint);
+      border-bottom:2px solid var(--text-faint);
+      transform:translateY(-65%) rotate(45deg);
+      pointer-events:none;
+    }
+
+    .route-select{
+      width:100%;
+      height:52px;
+      padding:0 44px 0 15px;
+
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+
+      background:var(--surface-2);
+      color:var(--text);
+
+      border:1px solid var(--border);
+      border-radius:12px;
+
+      font-family:var(--font);
+      font-size:13.5px;
+      font-weight:600;
+
+      cursor:pointer;
+      outline:none;
+
+      transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        background .15s ease;
+    }
+
+    .route-select:hover{
+      border-color:var(--accent);
+      background:var(--surface);
+    }
+
+    .route-select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--accent-soft);
+    }
+
+    .route-select:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .route-select option{
+      background:var(--surface);
+      color:var(--text);
+      font-family:var(--font);
+    }
+
+    .route-order-dropdown{
+      position:relative;
+      margin-top:8px;
+    }
+
+    .route-order-dropdown-btn{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      text-align:left;
+      height:52px;
+    }
+
+    .route-order-dropdown-arrow{
+      font-size:18px;
+      color:var(--text-faint);
+      transition:transform .15s ease;
+    }
+
+    .route-order-dropdown.open .route-order-dropdown-arrow{
+      transform:rotate(180deg);
+    }
+
+    .route-order-dropdown-menu{
+      display:none;
+      position:absolute;
+      z-index:1200;
+      top:calc(100% + 7px);
+      left:0;
+      right:0;
+      max-height:280px;
+      overflow-y:auto;
+      padding:7px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+    }
+
+    .route-order-dropdown.open .route-order-dropdown-menu{
+      display:block;
+    }
+
+    .route-order-option{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:10px;
+      border-radius:9px;
+      cursor:pointer;
+      transition:background .15s ease;
+    }
+
+    .route-order-option:hover{
+      background:var(--surface-2);
+    }
+
+    .route-order-option input{
+      width:16px;
+      height:16px;
+      margin-top:2px;
+      accent-color:var(--accent);
+      flex:0 0 auto;
+    }
+
+    .route-order-option-text{
+      min-width:0;
+      font-size:12px;
+      line-height:1.45;
+      font-weight:600;
+      color:var(--text);
+    }
+
+    .route-order-empty{
+      padding:12px;
+      font-size:12px;
+      color:var(--text-faint);
+    }
+
+    /* ---------- Vehicle ---------- */
+
+    .route-vehicle-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:8px;
+    }
+
+    .route-vehicle-btn{
+      min-height:50px;
+      justify-content:center;
+      border-radius:11px;
+      transition:.15s ease;
+    }
+
+    .route-vehicle-btn svg{
+      width:17px;
+      height:17px;
+    }
+
+    .route-vehicle-btn.active{
+      background:var(--accent);
+      color:#08110c;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px var(--accent-soft);
+    }
+
+    .route-vehicle-btn.active:hover{
+      background:var(--accent-2);
+      color:#08110c;
+    }
+
+    /* ---------- Map location button ---------- */
+
+    .route-map-location-btn{
+      position:absolute;
+      top:14px;
+      right:14px;
+      z-index:1000;
+
+      width:44px;
+      height:44px;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      border:1px solid var(--border);
+      border-radius:11px;
+
+      background:var(--surface);
+      color:var(--text);
+
+      box-shadow:var(--shadow);
+      cursor:pointer;
+
+      transition:.15s ease;
+    }
+
+    .route-map-location-btn:hover{
+      border-color:var(--accent);
+      color:var(--accent-text);
+      transform:translateY(-1px);
+    }
+
+    .route-map-location-btn:active{
+      transform:scale(.96);
+    }
+
+    .route-map-location-btn.loading{
+      color:var(--accent-text);
+    }
+
+    .route-map-location-btn svg{
+      width:19px;
+      height:19px;
+    }
+
+    /* ---------- Map legend ---------- */
+
+    .route-map-legend{
+      position:absolute;
+      left:14px;
+      bottom:14px;
+      z-index:1000;
+
+      display:flex;
+      align-items:center;
+      gap:12px;
+
+      padding:9px 12px;
+
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:10px;
+
+      box-shadow:var(--shadow);
+
+      font-size:10.5px;
+      font-weight:700;
+      color:var(--text-dim);
+    }
+
+    .route-map-legend-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .route-map-dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      flex-shrink:0;
+    }
+
+    .route-map-dot.origin{
+      background:#2563eb;
+    }
+
+    .route-map-dot.destination{
+      background:#ef4444;
+    }
+
+    /* ---------- Route message ---------- */
+
+    .route-message{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+    }
+
+    .route-message-icon{
+      width:34px;
+      height:34px;
+      flex-shrink:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:9px;
+      background:var(--surface-2);
+      color:var(--accent-text);
+    }
+
+    .route-message-icon svg{
+      width:16px;
+      height:16px;
+    }
+
+    /* ---------- Order info ---------- */
+
+    .route-order-info{
+      margin-top:16px;
+      padding:14px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+
+    .route-order-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .route-order-title{
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .route-order-meta{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+
+    .route-order-meta-item{
+      min-width:0;
+    }
+
+    .route-order-meta-label{
+      font-size:10.5px;
+      color:var(--text-faint);
+      margin-bottom:3px;
+    }
+
+    .route-order-meta-value{
+      font-size:12px;
+      font-weight:700;
+      color:var(--text);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* ---------- Check Route ---------- */
+
+    .route-check-box{
+      display:none;
+      margin-top:14px;
+      padding:14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:var(--surface);
+    }
+
+    .route-check-box.show{display:block;}
+
+    .route-check-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .route-check-icon{
+      width:38px;
+      height:38px;
+      flex:0 0 38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:10px;
+      background:var(--accent-soft);
+      color:var(--accent-text);
+    }
+
+    .route-check-icon svg{width:18px;height:18px;}
+
+    .route-check-title{
+      font-size:13px;
+      font-weight:800;
+      color:var(--text);
+    }
+
+    .route-check-sub{
+      margin-top:3px;
+      font-size:11.5px;
+      line-height:1.5;
+      color:var(--text-faint);
+    }
+
+    .route-check-actions{
+      display:flex;
+      gap:9px;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+
+    .route-check-actions .btn{
+      min-height:42px;
+    }
+
+    .farmlink-map-label{
+      background:var(--surface);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:4px 8px;
+      font-size:11px;
+      font-weight:800;
+      box-shadow:var(--shadow);
+    }
+
+    .farmlink-map-label:before{
+      border-top-color:var(--surface) !important;
+    }
+
+    /* ---------- Responsive ---------- */
+
+    @media(max-width:760px){
+
+      .route-vehicle-grid{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .route-map{
+        height:380px;
+      }
+
+      .route-origin-box{
+        align-items:flex-start;
+      }
+
+      .route-origin-btn{
+        padding:8px 10px;
+      }
+
+      .route-order-meta{
+        grid-template-columns:1fr;
+      }
+
+      .route-map-legend{
+        gap:8px;
+        padding:8px 9px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body class="farmer-theme" data-page="route-optimizer">
+
+  <div class="mobile-overlay"></div>
+
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+
+    <aside
+      class="sidebar"
+      id="sidebarMount"
+    ></aside>
+
+
+    <main class="main">
+
+      <!-- TOPBAR -->
+
+      <div class="topbar">
+
+        <div style="display:flex;align-items:center;gap:12px;">
+
+          <button
+            class="hamburger icon-btn"
+            id="hamburgerBtn"
+          >
+            <i data-lucide="menu"></i>
+          </button>
+
+          <h1 data-i18n="nav.routeOptimizer">
+            Route Optimizer
+          </h1>
+
+        </div>
+
+
+        <div class="topbar-actions">
+
+          <button
+            class="icon-btn"
+            id="themeToggleBtn"
+          >
+            <span id="themeIcon"></span>
+          </button>
+
+          <button
+            class="icon-btn"
+            id="langToggleBtn"
+          >
+            <i data-lucide="languages"></i>
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ROUTE SETUP -->
+
+      <div class="page-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>Plan Delivery Route</h3>
+
+            <p>
+              Use your GPS origin and select the FarmLink orders you want to deliver.
+            </p>
+
+          </div>
+
+          <span
+            class="badge badge-gray"
+            id="routeStatus"
+          >
+            Ready
+          </span>
+
+        </div>
+
+
+        <!-- ORIGIN -->
+
+        <div class="route-setup-group">
+
+          <label class="form-label">
+            Pickup / Origin
+          </label>
+
+          <div class="route-origin-box">
+
+            <div class="route-origin-icon">
+              <i data-lucide="map-pin"></i>
+            </div>
+
+            <div class="route-origin-content">
+
+              <div
+                class="route-origin-title"
+                id="originTitle"
+              >
+                Your location
+              </div>
+
+              <div
+                class="route-origin-sub"
+                id="originSubtitle"
+              >
+                Location will be requested when you check a route
+              </div>
+
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary route-origin-btn"
+              id="myLocationBtn"
+            >
+              <i data-lucide="navigation"></i>
+              <span>Set my location</span>
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- DESTINATION -->
+
+        <div class="route-setup-group">
+
+          <label class="form-label">
+            Delivery Destination
+          </label>
+
+          <div class="route-select-wrap">
+
+            <div class="route-order-dropdown" id="orderDropdown">
+
+              <button
+                type="button"
+                class="route-select route-order-dropdown-btn"
+                id="orderSelectBtn"
+              >
+                <span id="orderSelectLabel">
+                  Select orders
+                </span>
+                <span class="route-order-dropdown-arrow">⌄</span>
+              </button>
+
+              <div
+                class="route-order-dropdown-menu"
+                id="orderSelectMenu"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- VEHICLE -->
+
+        <div class="route-setup-group">
+
+          <label class="form-label">
+            Delivery Vehicle
+          </label>
+
+          <div
+            id="vehicleOptions"
+            class="route-vehicle-grid"
+          >
+
+            <button
+              type="button"
+              class="btn route-vehicle-btn active"
+              data-vehicle="TWO_WHEELER"
+            >
+              <i data-lucide="bike"></i>
+              <span>Two-wheeler</span>
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-ghost route-vehicle-btn"
+              data-vehicle="CAR"
+            >
+              <i data-lucide="car-front"></i>
+              <span>Car</span>
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-ghost route-vehicle-btn"
+              data-vehicle="VAN"
+            >
+              <i data-lucide="van"></i>
+              <span>Van</span>
+            </button>
+
+
+            <button
+              type="button"
+              class="btn btn-ghost route-vehicle-btn"
+              data-vehicle="TRUCK"
+            >
+              <i data-lucide="truck"></i>
+              <span>Truck</span>
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- SELECTED ORDER -->
+
+        <div id="orderInfo"></div>
+
+        <!-- CHECK ROUTE -->
+        <div id="checkRouteBox" class="route-check-box">
+
+          <div class="route-check-head">
+            <div class="route-check-icon">
+              <i data-lucide="route"></i>
+            </div>
+
+            <div>
+              <div class="route-check-title">Ready to check this route</div>
+              <div class="route-check-sub">
+                FarmLink has the delivery destination. Confirm your current location to calculate the real road route.
+              </div>
+            </div>
+          </div>
+
+          <div class="route-check-actions">
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="checkRouteBtn"
+            >
+              <i data-lucide="route"></i>
+              <span>Check Route</span>
+            </button>
+          </div>
+
+        </div>
+
+        <div id="locationConfirmBox" class="route-check-box">
+
+          <div class="route-check-head">
+            <div class="route-check-icon">
+              <i data-lucide="navigation"></i>
+            </div>
+
+            <div>
+              <div class="route-check-title">Confirm your pickup location</div>
+              <div class="route-check-sub">
+                Route calculation will start from your device's current GPS location.
+              </div>
+            </div>
+          </div>
+
+          <div class="route-check-actions">
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="confirmLocationBtn"
+            >
+              <i data-lucide="locate-fixed"></i>
+              <span>Use My Location &amp; Check Route</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-ghost"
+              id="cancelLocationBtn"
+            >
+              Cancel
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- MAP -->
+
+      <div
+        class="page-card"
+        style="margin-top:16px;"
+      >
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>Live Location Map</h3>
+
+            <p>
+              India is shown by default. Your GPS is used only when requested.
+            </p>
+
+          </div>
+
+          <span
+            class="badge badge-gray"
+            id="gpsBadge"
+          >
+            GPS not active
+          </span>
+
+        </div>
+
+
+        <div class="route-map-wrap">
+
+          <div
+            id="routeMap"
+            class="route-map"
+          ></div>
+
+
+          <!-- ALWAYS AVAILABLE -->
+
+          <button
+            type="button"
+            class="route-map-location-btn"
+            id="recenterBtn"
+            title="Show my location"
+            aria-label="Show my location"
+          >
+
+            <i data-lucide="locate-fixed"></i>
+
+          </button>
+
+
+          <div class="route-map-legend">
+
+            <div class="route-map-legend-item">
+              <span class="route-map-dot origin"></span>
+              <span>Your location</span>
+            </div>
+
+            <div class="route-map-legend-item">
+              <span class="route-map-dot destination"></span>
+              <span>Delivery</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ROUTE RESULTS -->
+
+      <div
+        class="page-card"
+        style="margin-top:16px;"
+      >
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>Route Results</h3>
+
+            <p>
+              Values below come from the selected orders and calculated route.
+            </p>
+
+          </div>
+
+          <span
+            class="badge badge-gray"
+            id="routingBadge"
+          >
+            Routing
+          </span>
+
+        </div>
+
+
+        <div
+          class="grid grid-3"
+          style="margin-top:16px;"
+        >
+
+          <div class="stat-card">
+
+            <div class="label">
+
+              Distance
+
+              <i data-lucide="route"></i>
+
+            </div>
+
+            <div
+              class="value"
+              id="routeDistance"
+            >
+              —
+            </div>
+
+            <div class="sub">
+              Real road distance
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="label">
+
+              Travel time
+
+              <i data-lucide="clock"></i>
+
+            </div>
+
+            <div
+              class="value"
+              id="routeTime"
+            >
+              —
+            </div>
+
+            <div
+              class="sub"
+              id="routeTimeSub"
+            >
+              Select a vehicle
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="label">
+
+              Delivery cost
+
+              <i data-lucide="indian-rupee"></i>
+
+            </div>
+
+            <div
+              class="value"
+              id="routeCost"
+            >
+              —
+            </div>
+
+            <div class="sub">
+              Cost model not configured
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="routeMessage"
+          class="row-item"
+          style="margin-top:16px;"
+        >
+
+          <div class="route-message">
+
+            <div class="route-message-icon">
+              <i data-lucide="info"></i>
+            </div>
+
+            <span class="text-faint">
+              Select one or more orders to calculate the route.
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- PERFORMANCE -->
+
+      <div
+        class="page-card"
+        style="margin-top:16px;"
+      >
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>Route Performance</h3>
+
+            <p>
+              Historical FarmLink shipment data will be used here.
+            </p>
+
+          </div>
+
+          <span class="badge badge-gray">
+            ML analysis
+          </span>
+
+        </div>
+
+
+        <div
+          class="grid grid-3"
+          style="margin-top:16px;"
+        >
+
+          <div class="stat-card">
+
+            <div class="label">
+
+              On-time delivery
+
+              <i data-lucide="check-circle"></i>
+
+            </div>
+
+            <div
+              class="value"
+              id="routeOnTime"
+            >
+              —
+            </div>
+
+            <div class="sub">
+              Historical data required
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="label">
+
+              Average delay
+
+              <i data-lucide="timer"></i>
+
+            </div>
+
+            <div
+              class="value"
+              id="routeDelay"
+            >
+              —
+            </div>
+
+            <div class="sub">
+              Historical data required
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="label">
+
+              Route efficiency
+
+              <i data-lucide="gauge"></i>
+
+            </div>
+
+            <div
+              class="value"
+              id="routeEfficiency"
+            >
+              —
+            </div>
+
+            <div class="sub">
+              ML analysis required
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <!-- LANGUAGE MODAL -->
+
+  <div
+    class="modal-overlay"
+    id="langModal"
+  >
+
+    <div
+      class="modal"
+      style="max-width:400px;"
+    >
+
+      <div class="modal-head">
+
+        <h3 data-i18n="lang.title">
+          Choose your language
+        </h3>
+
+        <button
+          class="modal-close"
+          onclick="flCloseModal('langModal')"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div id="langOptionsWrap"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- LEAFLET -->
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- LUCIDE -->
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- SHARED -->
+
+  <script src="../shared/shared.js"></script>
+
+  <script src="js/app.js"></script>
+
+
+  <script>
+    /* ==========================================================
+       FARM LINK AI — ROUTE OPTIMIZER
+       Flow:
+       1. India map on refresh
+       2. Select real FarmLink order
+       3. Click Check Route
+       4. Confirm current GPS location
+       5. Calculate real road route
+       6. Vehicle changes recalculate route
+    ========================================================== */
+
+    let routeMap = null;
+    let routeLayer = null;
+    let selectedOrders = [];
+    let currentLocation = null;
+    let currentLocationMarker = null;
+    let locationAccuracyCircle = null;
+    let selectedVehicle = "TWO_WHEELER";
+    let routeMarkers = [];
+    let selectedDeliveries = [];
+    let routeCalculated = false;
+    
+
+    function getRoutingProfile(){
+      if(selectedVehicle === "TWO_WHEELER") return "motorcycle";
+      if(selectedVehicle === "TRUCK") return "truck";
+      return "auto";
+    }
+
+    function getVehicleLabel(){
+      const labels = {
+        TWO_WHEELER:"Two-wheeler",
+        CAR:"Car",
+        VAN:"Van",
+        TRUCK:"Truck"
+      };
+      return labels[selectedVehicle] || selectedVehicle;
+    }
+
+    function setStatus(text){
+      document.getElementById("routeStatus").textContent = text;
+    }
+
+    function refreshIcons(){
+      if(window.lucide) lucide.createIcons();
+    }
+
+    function initializeRouteMap(){
+
+      routeMap = L.map("routeMap", {
+        zoomControl:true
+      });
+
+      L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom:19,
+          attribution:"&copy; OpenStreetMap contributors"
+        }
+      ).addTo(routeMap);
+
+      routeMap.fitBounds(
+        [
+          [8.4,68.7],
+          [35.7,97.3]
+        ],
+        {padding:[20,20]}
+      );
+    }
+
+    function updateLocationOnMap(
+      latitude,
+      longitude,
+      accuracy,
+      centerMap = false
+    ){
+
+      const position = [latitude,longitude];
+
+      if(!currentLocationMarker){
+
+        currentLocationMarker =
+          L.circleMarker(
+            position,
+            {
+              radius:8,
+              color:"#2563eb",
+              weight:3,
+              fillColor:"#2563eb",
+              fillOpacity:.9
+            }
+          ).addTo(routeMap);
+
+      }else{
+
+        currentLocationMarker.setLatLng(position);
+      }
+
+      currentLocationMarker.bindTooltip(
+        "Your Location",
+        {
+          permanent:true,
+          direction:"top",
+          offset:[0,-8],
+          className:"farmlink-map-label"
+        }
+      );
+
+      if(!locationAccuracyCircle){
+
+        locationAccuracyCircle =
+          L.circle(
+            position,
+            {
+              radius:accuracy,
+              color:"#2563eb",
+              weight:1,
+              fillColor:"#2563eb",
+              fillOpacity:.08
+            }
+          ).addTo(routeMap);
+
+      }else{
+
+        locationAccuracyCircle.setLatLng(position);
+        locationAccuracyCircle.setRadius(accuracy);
+      }
+
+      if(centerMap){
+        routeMap.setView(position,15);
+      }
+    }
+
+    function setGpsUI(){
+
+      document.getElementById("originTitle").textContent =
+        "Your current location";
+
+      document.getElementById("originSubtitle").textContent =
+        `GPS accuracy: approximately ${Math.round(currentLocation.accuracy)} metres`;
+
+      document.getElementById("gpsBadge").textContent =
+        "GPS active";
+
+      document.getElementById("myLocationBtn").innerHTML =
+        '<i data-lucide="navigation"></i><span>Update my location</span>';
+
+      refreshIcons();
+    }
+
+    function handleLocationError(error){
+
+      let message = "Unable to determine your location.";
+
+      if(error && error.code === 1){
+        message = "Location permission was denied. Allow location access and try again.";
+      }else if(error && error.code === 2){
+        message = "Your device could not determine your location.";
+      }else if(error && error.code === 3){
+        message = "Location request timed out. Try again.";
+      }
+
+      document.getElementById("originSubtitle").textContent = message;
+      document.getElementById("gpsBadge").textContent = "GPS unavailable";
+      document.getElementById("myLocationBtn").disabled = false;
+      document.getElementById("myLocationBtn").innerHTML =
+        '<i data-lucide="navigation"></i><span>Set my location</span>';
+
+      setStatus("GPS unavailable");
+      refreshIcons();
+    }
+
+    function requestCurrentLocation(centerMap = true){
+
+      if(!navigator.geolocation){
+        handleLocationError({code:2});
+        return Promise.reject(new Error("Geolocation is not supported."));
+      }
+
+      document.getElementById("myLocationBtn").disabled = true;
+
+      document.getElementById("myLocationBtn").innerHTML =
+        '<i data-lucide="loader-2"></i><span>Detecting...</span>';
+
+      document.getElementById("recenterBtn").classList.add("loading");
+      document.getElementById("recenterBtn").innerHTML =
+        '<i data-lucide="loader-2"></i>';
+
+      refreshIcons();
+
+      return new Promise((resolve,reject)=>{
+
+        navigator.geolocation.getCurrentPosition(
+
+          position => {
+
+            currentLocation = {
+              latitude:position.coords.latitude,
+              longitude:position.coords.longitude,
+              accuracy:position.coords.accuracy
+            };
+
+            updateLocationOnMap(
+              currentLocation.latitude,
+              currentLocation.longitude,
+              currentLocation.accuracy,
+              centerMap
+            );
+
+            document.getElementById("recenterBtn").classList.remove("loading");
+            document.getElementById("recenterBtn").innerHTML =
+              '<i data-lucide="locate-fixed"></i>';
+
+            document.getElementById("myLocationBtn").disabled = false;
+
+            setGpsUI();
+            resolve(currentLocation);
+          },
+
+          error => {
+
+            document.getElementById("recenterBtn").classList.remove("loading");
+            document.getElementById("recenterBtn").innerHTML =
+              '<i data-lucide="locate-fixed"></i>';
+
+            handleLocationError(error);
+            reject(error);
+          },
+
+          {
+            enableHighAccuracy:true,
+            timeout:20000,
+            maximumAge:0
+          }
+        );
+      });
+    }
+
+    document
+      .getElementById("myLocationBtn")
+      .addEventListener("click",async()=>{
+
+        try{
+          await requestCurrentLocation(true);
+        }catch(error){
+          console.error("GPS error:",error);
+        }
+
+      });
+
+    document
+      .getElementById("recenterBtn")
+      .addEventListener("click",async()=>{
+
+        if(currentLocation){
+
+          routeMap.setView(
+            [
+              currentLocation.latitude,
+              currentLocation.longitude
+            ],
+            15
+          );
+
+          return;
+        }
+
+        try{
+          await requestCurrentLocation(true);
+        }catch(error){
+          console.error("GPS error:",error);
+        }
+
+      });
+
+    document
+      .querySelectorAll(".route-vehicle-btn")
+      .forEach(button=>{
+
+        button.addEventListener("click",async function(){
+
+          document
+            .querySelectorAll(".route-vehicle-btn")
+            .forEach(item=>{
+              item.classList.remove("active");
+              item.classList.add("btn-ghost");
+            });
+
+          this.classList.remove("btn-ghost");
+          this.classList.add("active");
+
+          selectedVehicle = this.dataset.vehicle;
+
+          if(routeCalculated && currentLocation && selectedOrders.length){
+            try{
+              await calculateMultiRoute();
+            }catch(error){
+              console.error("Vehicle route recalculation error:",error);
+            }
+          }
+
+        });
+
+      });
+
+    function updateOrderDropdownLabel(){
+
+      const label =
+        document.getElementById("orderSelectLabel");
+
+      if(!selectedOrders.length){
+        label.textContent = "Select orders";
+        return;
+      }
+
+      if(selectedOrders.length === 1){
+        label.textContent =
+          `${selectedOrders[0].orderNumber} selected`;
+        return;
+      }
+
+      label.textContent =
+        `${selectedOrders.length} orders selected`;
+    }
+
+    function renderOrderDropdown(){
+
+      const menu =
+        document.getElementById("orderSelectMenu");
+
+      menu.innerHTML = "";
+
+      if(!window.routeOrders || !window.routeOrders.length){
+
+        menu.innerHTML =
+          '<div class="route-order-empty">No routable orders found</div>';
+
+        return;
+      }
+
+      window.routeOrders.forEach((order,index)=>{
+
+        const row =
+          document.createElement("label");
+
+        row.className = "route-order-option";
+
+        row.innerHTML = `
+          <input
+            type="checkbox"
+            value="${index}"
+          >
+          <span class="route-order-option-text">
+            ${escapeHtml(order.orderNumber)}
+            — ${escapeHtml(order.crop || "")}
+            — ${Number(order.quantityKg || 0).toLocaleString()} kg
+            → ${escapeHtml(order.deliveryLocation || "")}
+          </span>
+        `;
+
+        const checkbox =
+          row.querySelector("input");
+
+        checkbox.addEventListener("change",()=>{
+          handleOrderSelectionChange();
+        });
+
+        menu.appendChild(row);
+      });
+    }
+
+    async function handleOrderSelectionChange(){
+
+      const checkboxes =
+        Array.from(
+          document.querySelectorAll(
+            "#orderSelectMenu input[type='checkbox']:checked"
+          )
+        );
+
+      selectedOrders =
+        checkboxes
+          .map(input => window.routeOrders?.[Number(input.value)])
+          .filter(Boolean);
+
+      selectedDeliveries = [];
+      routeCalculated = false;
+
+      updateOrderDropdownLabel();
+      clearRoute();
+      resetResults();
+
+      const checkBox =
+        document.getElementById("checkRouteBox");
+
+      const confirmBox =
+        document.getElementById("locationConfirmBox");
+
+      if(!selectedOrders.length){
+
+        document.getElementById("orderInfo").innerHTML = "";
+
+        checkBox.classList.remove("show");
+        confirmBox.classList.remove("show");
+
+        routeMap.fitBounds(
+          [
+            [8.4,68.7],
+            [35.7,97.3]
+          ],
+          {padding:[20,20]}
+        );
+
+        setStatus("Ready");
+        return;
+      }
+
+      showOrders(selectedOrders);
+
+      checkBox.classList.remove("show");
+      confirmBox.classList.remove("show");
+
+      setStatus(
+        `${selectedOrders.length} order${selectedOrders.length > 1 ? "s" : ""} selected`
+      );
+
+      try{
+
+        setStatus("Finding delivery locations...");
+
+        for(const order of selectedOrders){
+
+          const delivery =
+            await geocode(
+              order.deliveryLocation
+            );
+
+          selectedDeliveries.push({
+            order,
+            delivery
+          });
+        }
+
+        selectedDeliveries.forEach(
+          (item,index)=>{
+            addDeliveryMarker(
+              item.delivery,
+              item.order,
+              index + 1
+            );
+          }
+        );
+
+        setStatus("Destinations ready");
+        checkBox.classList.add("show");
+
+        routeMap.fitBounds(
+          [
+            [8.4,68.7],
+            [35.7,97.3]
+          ],
+          {padding:[20,20]}
+        );
+
+        refreshIcons();
+
+      }catch(error){
+
+        console.error(error);
+
+        setStatus("Destination unavailable");
+
+        document.getElementById("routeMessage").innerHTML = `
+          <div class="route-message">
+
+            <div class="route-message-icon">
+              <i data-lucide="alert-circle"></i>
+            </div>
+
+            <span class="text-faint">
+              ${escapeHtml(error.message)}
+            </span>
+
+          </div>
+        `;
+
+        refreshIcons();
+      }
+    }
+
+    async function loadOrders(){
+
+      const menu =
+        document.getElementById("orderSelectMenu");
+
+      try{
+
+        const response =
+          await fetch(
+            "http://localhost:5000/api/orders/route-data"
+          );
+
+        if(!response.ok){
+          throw new Error("Backend request failed");
+        }
+
+        const data = await response.json();
+
+        if(!data.success){
+          throw new Error("Failed to load orders");
+        }
+
+        window.routeOrders = data.orders || [];
+
+        renderOrderDropdown();
+
+        if(!window.routeOrders.length){
+
+          setStatus("No shipment data");
+          return;
+        }
+
+        setStatus(
+          `${window.routeOrders.length} real shipment${window.routeOrders.length > 1 ? "s" : ""} loaded`
+        );
+
+      }catch(error){
+
+        console.error(error);
+
+        menu.innerHTML =
+          '<div class="route-order-empty">Failed to load orders</div>';
+
+        setStatus("Backend unavailable");
+      }
+    }
+
+    document
+      .getElementById("orderSelectBtn")
+      .addEventListener("click",event=>{
+
+        event.stopPropagation();
+
+        document
+          .getElementById("orderDropdown")
+          .classList.toggle("open");
+
+      });
+
+    document.addEventListener("click",event=>{
+
+      const dropdown =
+        document.getElementById("orderDropdown");
+
+      if(!dropdown.contains(event.target)){
+        dropdown.classList.remove("open");
+      }
+
+    });
+
+    function showOrders(orders){
+
+      const box = document.getElementById("orderInfo");
+
+      if(!orders.length){
+        box.innerHTML = "";
+        return;
+      }
+
+      box.innerHTML = `
+        <div class="route-order-info">
+
+          <div class="route-order-head">
+
+            <div class="route-order-title">
+              ${orders.length} delivery${orders.length > 1 ? "ies" : ""} selected
+            </div>
+
+            <span class="badge badge-green">
+              ${orders.length} stop${orders.length > 1 ? "s" : ""}
+            </span>
+
+          </div>
+
+          ${orders.map(order => `
+            <div style="padding:9px 0;border-top:1px solid var(--border);">
+
+              <div class="route-order-title">
+                ${escapeHtml(order.orderNumber)}
+              </div>
+
+              <div class="route-order-meta" style="margin-top:7px;">
+
+                <div class="route-order-meta-item">
+                  <div class="route-order-meta-label">Crop</div>
+                  <div class="route-order-meta-value">
+                    ${escapeHtml(order.crop || "—")}
+                  </div>
+                </div>
+
+                <div class="route-order-meta-item">
+                  <div class="route-order-meta-label">Quantity</div>
+                  <div class="route-order-meta-value">
+                    ${Number(order.quantityKg || 0).toLocaleString()} kg
+                  </div>
+                </div>
+
+                <div class="route-order-meta-item">
+                  <div class="route-order-meta-label">Delivery</div>
+                  <div
+                    class="route-order-meta-value"
+                    title="${escapeHtml(order.deliveryLocation || "")}"
+                  >
+                    ${escapeHtml(order.deliveryLocation || "—")}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          `).join("")}
+
+        </div>
+      `;
+    }
+
+    function escapeHtml(value){
+
+      return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function resetResults(){
+
+      document.getElementById("routeDistance").textContent = "—";
+      document.getElementById("routeTime").textContent = "—";
+      document.getElementById("routeCost").textContent = "—";
+
+      document.getElementById("routeTimeSub").textContent =
+        "Select a vehicle";
+
+      document.getElementById("routingBadge").textContent =
+        "Routing";
+
+      document.getElementById("routeMessage").innerHTML = `
+
+        <div class="route-message">
+
+          <div class="route-message-icon">
+            <i data-lucide="info"></i>
+          </div>
+
+          <span class="text-faint">
+            Select one or more destinations to calculate the route.
+          </span>
+
+        </div>
+      `;
+
+      refreshIcons();
+    }
+
+    function clearRoute(){
+
+      if(routeLayer){
+        routeMap.removeLayer(routeLayer);
+        routeLayer = null;
+      }
+
+      routeMarkers.forEach(marker=>{
+        if(routeMap.hasLayer(marker)){
+          routeMap.removeLayer(marker);
+        }
+      });
+
+      routeMarkers = [];
+    }
+
+    async function geocode(location){
+
+      const value = String(location || "").trim();
+
+      if(!value){
+        throw new Error("Delivery location is empty.");
+      }
+
+      const broadLocations = [
+        "maharashtra",
+        "india",
+        "mumbai metropolitan region"
+      ];
+
+      if(broadLocations.includes(value.toLowerCase())){
+        throw new Error(
+          `"${value}" is too broad. Please use a specific city, district or address.`
+        );
+      }
+
+      const url =
+        "https://nominatim.openstreetmap.org/search" +
+        "?format=json" +
+        "&limit=1" +
+        "&countrycodes=in" +
+        "&q=" +
+        encodeURIComponent(value + ", India");
+
+      const response =
+        await fetch(url,{
+          headers:{
+            "Accept":"application/json"
+          }
+        });
+
+      if(!response.ok){
+        throw new Error("Location lookup failed.");
+      }
+
+      const results = await response.json();
+
+      if(!results.length){
+        throw new Error(`Could not locate "${value}".`);
+      }
+
+      return {
+        lat:Number(results[0].lat),
+        lon:Number(results[0].lon),
+        name:results[0].display_name
+      };
+    }
+
+    async function calculateMultiRoute(){
+
+      if(!currentLocation){
+        throw new Error("Current GPS location is required.");
+      }
+
+      if(!selectedOrders.length){
+        throw new Error("Select at least one delivery.");
+      }
+
+      const message =
+        document.getElementById("routeMessage");
+
+      const status =
+        document.getElementById("routeStatus");
+
+      const routingBadge =
+        document.getElementById("routingBadge");
+
+      const routeTimeSub =
+        document.getElementById("routeTimeSub");
+
+      document.getElementById("routeDistance").textContent = "…";
+      document.getElementById("routeTime").textContent = "…";
+      document.getElementById("routeCost").textContent = "—";
+
+      routeTimeSub.textContent =
+        `${getVehicleLabel()} multi-stop routing`;
+
+      message.innerHTML = `
+        <div class="route-message">
+
+          <div class="route-message-icon">
+            <i data-lucide="loader-2"></i>
+          </div>
+
+          <span class="text-faint">
+            Optimizing ${selectedOrders.length} delivery stop${selectedOrders.length > 1 ? "s" : ""}...
+          </span>
+
+        </div>
+      `;
+
+      status.textContent = "Optimizing route...";
+      routingBadge.textContent = "OR-Tools + OSRM";
+
+      refreshIcons();
+
+      try{
+
+        const response =
+          await fetch(
+            "http://localhost:5000/api/route-optimization/multi",
+            {
+              method:"POST",
+              headers:{
+                "Content-Type":"application/json"
+              },
+              body:JSON.stringify({
+                orderIds:selectedOrders.map(order=>order.id),
+                origin:{
+                  latitude:currentLocation.latitude,
+                  longitude:currentLocation.longitude
+                },
+                vehicle:selectedVehicle
+              })
+            }
+          );
+
+        const data = await response.json();
+
+        if(!response.ok || !data.success){
+          throw new Error(
+            data.message || "Multi-order route optimization failed."
+          );
+        }
+
+        const stops = data.optimization?.stops || [];
+
+        if(!stops.length){
+          throw new Error("No optimized delivery stops were returned.");
+        }
+
+        const geometry =
+          data.optimization?.geometry;
+
+        if(
+          !geometry ||
+          !geometry.coordinates ||
+          !geometry.coordinates.length
+        ){
+          throw new Error(
+            "No road route geometry was returned."
+          );
+        }
+
+        clearRoute();
+
+        const allCoordinates =
+          geometry.coordinates.map(
+            ([longitude, latitude]) =>
+              [latitude, longitude]
+          );
+
+        routeLayer =
+          L.polyline(
+            allCoordinates,
+            {
+              color:"#22c55e",
+              weight:5,
+              opacity:.88,
+              lineJoin:"round"
+            }
+          ).addTo(routeMap);
+
+        addOriginMarker();
+
+        stops.forEach((stop,index)=>{
+
+          const order =
+            selectedOrders.find(
+              item =>
+                String(item.id) ===
+                String(stop.orderId)
+            ) || {
+              orderNumber:stop.orderNumber,
+              deliveryLocation:stop.location
+            };
+
+          addDeliveryMarker(
+            {
+              lat:Number(stop.latitude),
+              lon:Number(stop.longitude)
+            },
+            order,
+            index + 1
+          );
+
+        });
+
+        routeMap.fitBounds(
+          routeLayer.getBounds(),
+          {padding:[50,50]}
+        );
+
+        if(currentLocationMarker){
+          currentLocationMarker.addTo(routeMap);
+        }
+
+        if(locationAccuracyCircle){
+          locationAccuracyCircle.addTo(routeMap);
+        }
+
+        const distanceKm =
+          Number(
+            data.optimization.totalDistanceKm
+          );
+
+        const durationMinutes =
+          Number(
+            data.optimization.estimatedTravelMinutes
+          );
+
+        document.getElementById("routeDistance").textContent =
+          `${distanceKm.toFixed(1)} km`;
+
+        document.getElementById("routeTime").textContent =
+          formatMinutes(durationMinutes);
+
+        routeTimeSub.textContent =
+          `${getVehicleLabel()} · ${stops.length} stops`;
+
+        document.getElementById("routeCost").textContent = "—";
+
+        message.innerHTML = `
+          <div class="route-message">
+
+            <div class="route-message-icon">
+              <i data-lucide="check-circle"></i>
+            </div>
+
+            <div>
+
+              <b>Route optimized</b>
+
+              <div
+                class="text-faint"
+                style="margin-top:4px;"
+              >
+                Your Location →
+                ${stops.map(
+                  (stop,index) =>
+                    `Stop ${index + 1}: ${escapeHtml(stop.location)}`
+                ).join(" → ")}
+                <br>
+                ${getVehicleLabel()}
+                · ${distanceKm.toFixed(1)} km
+                · ${formatMinutes(durationMinutes)}
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+        status.textContent = "Route optimized";
+        routeCalculated = true;
+
+        refreshIcons();
+
+      }catch(error){
+
+        console.error("Multi-route calculation error:",error);
+
+        document.getElementById("routeDistance").textContent = "—";
+        document.getElementById("routeTime").textContent = "—";
+
+        message.innerHTML = `
+          <div class="route-message">
+
+            <div class="route-message-icon">
+              <i data-lucide="alert-circle"></i>
+            </div>
+
+            <div>
+
+              <b>Route unavailable</b>
+
+              <div
+                class="text-faint"
+                style="margin-top:4px;"
+              >
+                ${escapeHtml(error.message)}
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+        status.textContent = "Route unavailable";
+        routeCalculated = false;
+
+        refreshIcons();
+
+        throw error;
+      }
+    }
+
+    document
+      .getElementById("checkRouteBtn")
+      .addEventListener("click",()=>{
+
+        if(!selectedOrders.length || !selectedDeliveries.length){
+          return;
+        }
+
+        document
+          .getElementById("checkRouteBox")
+          .classList.remove("show");
+
+        document
+          .getElementById("locationConfirmBox")
+          .classList.add("show");
+
+        setStatus("Confirm your location");
+        refreshIcons();
+
+      });
+
+    document
+      .getElementById("confirmLocationBtn")
+      .addEventListener("click",async()=>{
+
+        if(!selectedOrders.length){
+          return;
+        }
+
+        const button =
+          document.getElementById("confirmLocationBtn");
+
+        button.disabled = true;
+
+        button.innerHTML =
+          '<i data-lucide="loader-2"></i><span>Getting your location...</span>';
+
+        refreshIcons();
+
+        try{
+
+          await requestCurrentLocation(true);
+
+          document
+            .getElementById("locationConfirmBox")
+            .classList.remove("show");
+
+          await calculateMultiRoute();
+
+        }catch(error){
+
+          console.error(error);
+
+        }finally{
+
+          button.disabled = false;
+
+          button.innerHTML =
+            '<i data-lucide="locate-fixed"></i><span>Use My Location &amp; Check Route</span>';
+
+          refreshIcons();
+        }
+
+      });
+
+    document
+      .getElementById("cancelLocationBtn")
+      .addEventListener("click",()=>{
+
+        document
+          .getElementById("locationConfirmBox")
+          .classList.remove("show");
+
+        if(selectedOrders.length){
+
+          document
+            .getElementById("checkRouteBox")
+            .classList.add("show");
+
+          setStatus(
+            `${selectedOrders.length} order${selectedOrders.length > 1 ? "s" : ""} selected`
+          );
+        }
+
+      });
+
+    function addOriginMarker(){
+
+      if(!currentLocation) return;
+
+      const marker =
+        L.circleMarker(
+          [
+            currentLocation.latitude,
+            currentLocation.longitude
+          ],
+          {
+            radius:9,
+            color:"#2563eb",
+            weight:3,
+            fillColor:"#2563eb",
+            fillOpacity:1
+          }
+        )
+        .addTo(routeMap)
+        .bindTooltip(
+          "Your Location",
+          {
+            permanent:true,
+            direction:"top",
+            offset:[0,-9],
+            className:"farmlink-map-label"
+          }
+        );
+
+      routeMarkers.push(marker);
+    }
+
+    function addDeliveryMarker(delivery,order,stopNumber){
+
+      const marker =
+        L.circleMarker(
+          [
+            delivery.lat,
+            delivery.lon
+          ],
+          {
+            radius:9,
+            color:"#ef4444",
+            weight:3,
+            fillColor:"#ef4444",
+            fillOpacity:1
+          }
+        )
+        .addTo(routeMap)
+        .bindTooltip(
+          `Stop ${stopNumber}`,
+          {
+            permanent:true,
+            direction:"top",
+            offset:[0,-9],
+            className:"farmlink-map-label"
+          }
+        );
+
+      marker.bindPopup(`
+        <b>Delivery Stop ${stopNumber}</b>
+        <br>
+        ${escapeHtml(order.deliveryLocation)}
+        <br>
+        <span style="color:#666;">
+          Order ${escapeHtml(order.orderNumber)}
+        </span>
+      `);
+
+      routeMarkers.push(marker);
+    }
+
+    function formatMinutes(minutes){
+
+      const rounded = Math.round(minutes);
+      const hours = Math.floor(rounded / 60);
+      const mins = rounded % 60;
+
+      if(hours > 0){
+        return `${hours}h ${mins}m`;
+      }
+
+      return `${mins}m`;
+    }
+
+    function decodePolyline(encoded){
+
+      let index = 0;
+      let lat = 0;
+      let lon = 0;
+      const coordinates = [];
+
+      while(index < encoded.length){
+
+        let result = 0;
+        let shift = 0;
+        let byte;
+
+        do{
+          byte =
+            encoded.charCodeAt(index++) - 63;
+
+          result |=
+            (byte & 0x1f) << shift;
+
+          shift += 5;
+
+        }while(byte >= 0x20);
+
+        const deltaLat =
+          (result & 1)
+            ? ~(result >> 1)
+            : result >> 1;
+
+        lat += deltaLat;
+
+        result = 0;
+        shift = 0;
+
+        do{
+          byte =
+            encoded.charCodeAt(index++) - 63;
+
+          result |=
+            (byte & 0x1f) << shift;
+
+          shift += 5;
+
+        }while(byte >= 0x20);
+
+        const deltaLon =
+          (result & 1)
+            ? ~(result >> 1)
+            : result >> 1;
+
+        lon += deltaLon;
+
+        coordinates.push([
+          lat / 1000000,
+          lon / 1000000
+        ]);
+      }
+
+      return coordinates;
+    }
+
+    /*
+      START
+    */
+    initializeRouteMap();
+    loadOrders();
+    resetResults();
+
+    if(window.lucide){
+      lucide.createIcons();
+    }
+  </script>
+
+
+</body>
+
+</html>

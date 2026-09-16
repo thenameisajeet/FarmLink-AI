@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Payments</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="farmer-theme" data-page="payments">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebarMount"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <h1 data-i18n="nav.payments">Payments</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn" id="langToggleBtn"><i data-lucide="languages"></i></button>
+      </div>
+    </div>
+
+    <div class="grid grid-4">
+      <div class="stat-card"><div class="label">Available balance<i data-lucide="wallet"></i></div><div class="value" id="balanceVal">₹18,240</div><div class="sub">Ready to withdraw</div></div>
+      <div class="stat-card"><div class="label">On-time payments<i data-lucide="check-circle-2"></i></div><div class="value">98.4%</div><div class="sub">Last 90 days</div></div>
+      <div class="stat-card"><div class="label">Disputed orders<i data-lucide="alert-triangle"></i></div><div class="value">0</div><div class="sub">Clean record</div></div>
+      <div class="stat-card"><div class="label">Avg. payment time<i data-lucide="clock"></i></div><div class="value">1.4 days</div><div class="sub">From delivery confirmation</div></div>
+    </div>
+
+    <div class="page-card" style="margin-top:16px;">
+      <div class="card-head"><h3>Transaction history</h3><button class="btn btn-primary btn-sm" onclick="withdraw()">Withdraw to bank</button></div>
+      <div id="txWrap"></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="langModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3 data-i18n="lang.title">Choose your language</h3><button class="modal-close" onclick="flCloseModal('langModal')">✕</button></div>
+    <div id="langOptionsWrap"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+<script>
+const TX_DEFAULT = [
+  { buyer:'MahaFresh', desc:'2,000 kg tomato', amount:5720, status:'PAID', date:'Today' },
+  { buyer:'Shree Foods', desc:'Advance for 5,000 kg onion', amount:4200, status:'PENDING', date:'Yesterday' },
+  { buyer:'FreshCart', desc:'800 kg grapes', amount:4160, status:'PAID', date:'3 days ago' },
+];
+function renderTx(){
+  const tx = flStore.get('farmlink-transactions', TX_DEFAULT);
+  document.getElementById('txWrap').innerHTML = tx.map(t => `
+    <div class="row-item">
+      <div class="row-left"><div class="row-icon">₹</div><div><div class="row-title">${t.buyer}</div><div class="row-sub">${t.desc} • ${t.date}</div></div></div>
+      <div class="row-right"><b>₹${t.amount.toLocaleString()}</b><div><span class="badge ${t.status==='PAID'?'badge-green':'badge-orange'}">${t.status}</span></div></div>
+    </div>`).join('');
+}
+function withdraw(){
+  flToast('Withdrawal request sent to your linked bank account');
+}
+renderTx();
+</script>
+</body>
+</html>

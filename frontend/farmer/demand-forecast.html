@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FarmLink AI — Demand Forecast</title>
+
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="farmer-theme" data-page="demand-forecast">
+
+<div class="mobile-overlay"></div>
+
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebarMount"></aside>
+
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+
+      <div style="display:flex;align-items:center;gap:12px;">
+
+        <button class="hamburger icon-btn" id="hamburgerBtn">
+          <i data-lucide="menu"></i>
+        </button>
+
+        <h1 data-i18n="nav.demandForecast">
+          Demand Forecast
+        </h1>
+
+      </div>
+
+      <div class="topbar-actions">
+
+        <button class="icon-btn" id="themeToggleBtn">
+          <span id="themeIcon"></span>
+        </button>
+
+        <button class="icon-btn" id="langToggleBtn">
+          <i data-lucide="languages"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- MARKET INPUT -->
+    <div class="page-card">
+
+      <div class="card-head">
+
+        <div>
+          <h3>AI Market Forecast</h3>
+
+          <p>
+            Select your crop and market from available agricultural data.
+          </p>
+        </div>
+
+        <span class="badge badge-green">
+          <i data-lucide="brain"></i>
+          Live ML
+        </span>
+
+      </div>
+
+
+      <div class="grid grid-4" style="margin-top:16px;">
+
+        <div class="field">
+
+          <label>Commodity</label>
+
+          <select id="fcCommodity">
+            <option value="">Select commodity</option>
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>State</label>
+
+          <select id="fcState" disabled>
+            <option value="">Select state</option>
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>District</label>
+
+          <select id="fcDistrict" disabled>
+            <option value="">Select district</option>
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>Market</label>
+
+          <select id="fcMarket" disabled>
+            <option value="">Select market</option>
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <button
+        class="btn btn-primary"
+        id="fcPredictBtn"
+        style="margin-top:16px;"
+        disabled
+      >
+        <i data-lucide="sparkles"></i>
+        Generate AI Forecast
+      </button>
+
+    </div>
+
+
+    <!-- RESULT -->
+    <div
+      class="page-card"
+      id="fcResultCard"
+      style="margin-top:16px;"
+    >
+
+      <div class="card-head">
+
+        <div>
+
+          <h3 id="fcTitle">
+            AI demand signal
+          </h3>
+
+          <p id="fcSubtitle">
+            Waiting for prediction...
+          </p>
+
+        </div>
+
+        <span
+          class="badge badge-gray"
+          id="fcStatus"
+        >
+          Ready
+        </span>
+
+      </div>
+
+
+      <!-- SIMPLE PRICE VISUAL -->
+      <div style="margin-top:20px;">
+
+        <svg
+          viewBox="0 0 900 260"
+          style="width:100%;height:240px;"
+        >
+
+          <g
+            stroke="var(--border)"
+            stroke-width="1"
+          >
+
+            <line x1="40" y1="30" x2="860" y2="30"/>
+            <line x1="40" y1="80" x2="860" y2="80"/>
+            <line x1="40" y1="130" x2="860" y2="130"/>
+            <line x1="40" y1="180" x2="860" y2="180"/>
+            <line x1="40" y1="230" x2="860" y2="230"/>
+
+          </g>
+
+
+          <line
+            x1="180"
+            y1="190"
+            x2="720"
+            y2="90"
+            stroke="var(--accent)"
+            stroke-width="4"
+            stroke-linecap="round"
+          />
+
+
+          <circle
+            cx="180"
+            cy="190"
+            r="8"
+            fill="var(--accent)"
+          />
+
+
+          <circle
+            cx="720"
+            cy="90"
+            r="8"
+            fill="var(--accent)"
+          />
+
+
+          <text
+            x="140"
+            y="220"
+            fill="var(--text-faint)"
+            font-size="14"
+          >
+            Current price
+          </text>
+
+
+          <text
+            x="675"
+            y="65"
+            fill="var(--text-faint)"
+            font-size="14"
+          >
+            AI prediction
+          </text>
+
+        </svg>
+
+      </div>
+
+    </div>
+
+
+    <!-- AI RESULTS -->
+    <div
+      class="grid grid-3"
+      style="margin-top:16px;"
+    >
+
+      <div class="stat-card">
+
+        <div class="label">
+          Current market price
+          <i data-lucide="indian-rupee"></i>
+        </div>
+
+        <div
+          class="value"
+          id="fcCurrentPrice"
+        >
+          —
+        </div>
+
+        <div class="sub">
+          Latest available dataset value
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="label">
+          AI predicted price
+          <i data-lucide="brain"></i>
+        </div>
+
+        <div
+          class="value"
+          id="fcPredictedPrice"
+        >
+          —
+        </div>
+
+        <div class="sub">
+          Generated by Random Forest ML
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="label">
+          Demand signal
+          <i data-lucide="trending-up"></i>
+        </div>
+
+        <div
+          class="value"
+          id="fcDemandSignal"
+        >
+          —
+        </div>
+
+        <div
+          class="sub"
+          id="fcPriceChange"
+        >
+          Based on predicted price movement
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- DATA SOURCE -->
+    <div
+      class="page-card"
+      style="margin-top:16px;"
+    >
+
+      <div class="card-head">
+
+        <div>
+
+          <h3>Model information</h3>
+
+          <p>
+            FarmLink AI uses historical agricultural market
+            prices as a demand-signal proxy.
+          </p>
+
+        </div>
+
+        <span class="badge badge-gray">
+          Real dataset
+        </span>
+
+      </div>
+
+
+      <div
+        style="
+          display:grid;
+          grid-template-columns:repeat(3,1fr);
+          gap:16px;
+          margin-top:16px;
+        "
+      >
+
+        <div>
+          <div class="label">Model</div>
+          <strong>Random Forest</strong>
+        </div>
+
+        <div>
+          <div class="label">Input</div>
+          <strong>Historical market data</strong>
+        </div>
+
+        <div>
+          <div class="label">Output</div>
+          <strong>Next observed price</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- LANGUAGE MODAL -->
+
+<div
+  class="modal-overlay"
+  id="langModal"
+>
+
+  <div
+    class="modal"
+    style="max-width:400px;"
+  >
+
+    <div class="modal-head">
+
+      <h3 data-i18n="lang.title">
+        Choose your language
+      </h3>
+
+      <button
+        class="modal-close"
+        onclick="flCloseModal('langModal')"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div id="langOptionsWrap"></div>
+
+  </div>
+
+</div>
+
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+<script src="../shared/shared.js"></script>
+
+<script src="js/app.js"></script>
+
+
+<script>
+
+const API_BASE = "http://localhost:5000";
+
+
+const commoditySelect =
+  document.getElementById("fcCommodity");
+
+const stateSelect =
+  document.getElementById("fcState");
+
+const districtSelect =
+  document.getElementById("fcDistrict");
+
+const marketSelect =
+  document.getElementById("fcMarket");
+
+const predictButton =
+  document.getElementById("fcPredictBtn");
+
+
+/* ---------- Dropdown helper ---------- */
+
+function fillSelect(select, values, placeholder) {
+
+  select.innerHTML = `
+    <option value="">${placeholder}</option>
+  `;
+
+  values.forEach(value => {
+
+    const option =
+      document.createElement("option");
+
+    option.value = value;
+    option.textContent = value;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+/* ---------- Load dataset options ---------- */
+
+async function loadOptions(params = {}) {
+
+  const query =
+    new URLSearchParams(params).toString();
+
+  const response =
+    await fetch(
+      `${API_BASE}/api/ai/options${query ? "?" + query : ""}`
+    );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+
+    throw new Error(
+      data.message || "Unable to load options"
+    );
+
+  }
+
+  return data;
+
+}
+
+
+/* ---------- Initial commodities ---------- */
+
+async function loadCommodities() {
+
+  try {
+
+    const data =
+      await loadOptions();
+
+    fillSelect(
+      commoditySelect,
+      data.commodities,
+      "Select commodity"
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    if (typeof flToast === "function") {
+      flToast("Unable to load agricultural data.");
+    }
+
+  }
+
+}
+
+
+/* ---------- Commodity changed ---------- */
+
+commoditySelect.addEventListener(
+  "change",
+  async () => {
+
+    const commodity =
+      commoditySelect.value;
+
+
+    stateSelect.disabled = true;
+    districtSelect.disabled = true;
+    marketSelect.disabled = true;
+    predictButton.disabled = true;
+
+
+    fillSelect(
+      stateSelect,
+      [],
+      "Select state"
+    );
+
+    fillSelect(
+      districtSelect,
+      [],
+      "Select district"
+    );
+
+    fillSelect(
+      marketSelect,
+      [],
+      "Select market"
+    );
+
+
+    if (!commodity) {
+      return;
+    }
+
+
+    try {
+
+      const data =
+        await loadOptions({
+          commodity
+        });
+
+
+      fillSelect(
+        stateSelect,
+        data.states,
+        "Select state"
+      );
+
+      stateSelect.disabled = false;
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+);
+
+
+/* ---------- State changed ---------- */
+
+stateSelect.addEventListener(
+  "change",
+  async () => {
+
+    const commodity =
+      commoditySelect.value;
+
+    const state =
+      stateSelect.value;
+
+
+    districtSelect.disabled = true;
+    marketSelect.disabled = true;
+    predictButton.disabled = true;
+
+
+    fillSelect(
+      districtSelect,
+      [],
+      "Select district"
+    );
+
+    fillSelect(
+      marketSelect,
+      [],
+      "Select market"
+    );
+
+
+    if (!state) {
+      return;
+    }
+
+
+    try {
+
+      const data =
+        await loadOptions({
+          commodity,
+          state
+        });
+
+
+      fillSelect(
+        districtSelect,
+        data.districts,
+        "Select district"
+      );
+
+      districtSelect.disabled = false;
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+);
+
+
+/* ---------- District changed ---------- */
+
+districtSelect.addEventListener(
+  "change",
+  async () => {
+
+    const commodity =
+      commoditySelect.value;
+
+    const state =
+      stateSelect.value;
+
+    const district =
+      districtSelect.value;
+
+
+    marketSelect.disabled = true;
+    predictButton.disabled = true;
+
+
+    fillSelect(
+      marketSelect,
+      [],
+      "Select market"
+    );
+
+
+    if (!district) {
+      return;
+    }
+
+
+    try {
+
+      const data =
+        await loadOptions({
+          commodity,
+          state,
+          district
+        });
+
+
+      fillSelect(
+        marketSelect,
+        data.markets,
+        "Select market"
+      );
+
+      marketSelect.disabled = false;
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+);
+
+
+/* ---------- Market changed ---------- */
+
+marketSelect.addEventListener(
+  "change",
+  () => {
+
+    predictButton.disabled =
+      !marketSelect.value;
+
+  }
+);
+
+
+/* ---------- Generate AI prediction ---------- */
+
+predictButton.addEventListener(
+  "click",
+  async () => {
+
+    const commodity =
+      commoditySelect.value;
+
+    const state =
+      stateSelect.value;
+
+    const district =
+      districtSelect.value;
+
+    const market =
+      marketSelect.value;
+
+
+    if (
+      !commodity ||
+      !state ||
+      !district ||
+      !market
+    ) {
+      return;
+    }
+
+
+    predictButton.disabled = true;
+
+    predictButton.innerHTML = `
+      <i data-lucide="loader-circle"></i>
+      Generating AI prediction...
+    `;
+
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+
+    document.getElementById(
+      "fcStatus"
+    ).textContent = "Running ML";
+
+
+    try {
+
+      const query =
+        new URLSearchParams({
+          commodity,
+          state,
+          district,
+          market
+        });
+
+
+      const response =
+        await fetch(
+          `${API_BASE}/api/ai/demand?${query}`
+        );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok || data.error) {
+
+        throw new Error(
+          data.error ||
+          data.message ||
+          "Prediction failed"
+        );
+
+      }
+
+
+      document.getElementById(
+        "fcTitle"
+      ).textContent =
+        `${data.commodity} demand signal`;
+
+
+      document.getElementById(
+        "fcSubtitle"
+      ).textContent =
+        `${data.market}, ${data.district}, ${data.state} • Data: ${data.dataDate}`;
+
+
+      document.getElementById(
+        "fcCurrentPrice"
+      ).textContent =
+        `₹${Number(
+          data.currentPrice
+        ).toLocaleString("en-IN")}`;
+
+
+      document.getElementById(
+        "fcPredictedPrice"
+      ).textContent =
+        `₹${Number(
+          data.predictedPrice
+        ).toLocaleString("en-IN")}`;
+
+
+      document.getElementById(
+        "fcDemandSignal"
+      ).textContent =
+        data.demandSignal;
+
+
+      const change =
+        Number(data.priceChange);
+
+
+      const sign =
+        change > 0 ? "+" : "";
+
+
+      document.getElementById(
+        "fcPriceChange"
+      ).textContent =
+        `${sign}₹${change.toLocaleString("en-IN")} predicted price movement`;
+
+
+      document.getElementById(
+        "fcStatus"
+      ).textContent =
+        "ML prediction complete";
+
+
+      document.getElementById(
+        "fcStatus"
+      ).className =
+        "badge badge-green";
+
+
+    } catch (error) {
+
+      console.error(error);
+
+
+      document.getElementById(
+        "fcStatus"
+      ).textContent =
+        "Prediction failed";
+
+
+      document.getElementById(
+        "fcStatus"
+      ).className =
+        "badge badge-gray";
+
+
+      if (typeof flToast === "function") {
+
+        flToast(
+          error.message ||
+          "Unable to generate AI prediction."
+        );
+
+      } else {
+
+        alert(
+          error.message ||
+          "Unable to generate AI prediction."
+        );
+
+      }
+
+    }
+
+
+    predictButton.disabled =
+      !marketSelect.value;
+
+
+    predictButton.innerHTML = `
+      <i data-lucide="sparkles"></i>
+      Generate AI Forecast
+    `;
+
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+  }
+);
+
+
+/* ---------- Start ---------- */
+
+loadCommodities();
+
+
+</script>
+
+</body>
+</html>

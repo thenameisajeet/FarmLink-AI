@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Support</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+.faq-item{border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer;}
+.faq-q{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13.5px;}
+.faq-a{max-height:0;overflow:hidden;color:var(--text-dim);font-size:13px;transition:.2s;}
+.faq-item.open .faq-a{max-height:200px;margin-top:10px;}
+.faq-item.open .chev{transform:rotate(180deg);}
+.chev{transition:.2s;}
+</style>
+</head>
+<body class="farmer-theme" data-page="support">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebarMount"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <h1 data-i18n="nav.support">Support</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn" id="langToggleBtn"><i data-lucide="languages"></i></button>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="page-card">
+        <h3 style="margin-bottom:10px;">Frequently asked questions</h3>
+        <div id="faqWrap"></div>
+      </div>
+      <div class="page-card">
+        <h3 style="margin-bottom:10px;">Contact support</h3>
+        <form id="supportForm">
+          <div class="field"><label>Subject</label><input name="subject" placeholder="e.g. Payment not received" required></div>
+          <div class="field"><label>Message</label><textarea name="message" rows="4" placeholder="Describe your issue..." required></textarea></div>
+          <button class="btn btn-primary btn-block" type="submit">Submit ticket</button>
+        </form>
+        <div style="margin-top:16px;">
+          <div class="row-item"><span class="text-faint">Helpline</span><b>1800-000-FARM</b></div>
+          <div class="row-item"><span class="text-faint">Email</span><b>support@farmlink.ai</b></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="langModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3 data-i18n="lang.title">Choose your language</h3><button class="modal-close" onclick="flCloseModal('langModal')">✕</button></div>
+    <div id="langOptionsWrap"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+<script>
+const FAQS = [
+  { q:'How do I list my harvest?', a:'Go to "Sell Crop" from the sidebar, fill in crop, quantity, quality and price, then publish. It becomes visible to verified buyers immediately.' },
+  { q:'How does FarmLink verify buyers?', a:'Every buyer account goes through a business verification step before they can view or respond to your listings.' },
+  { q:'When do I get paid?', a:'Payments are typically released within 1-2 days of delivery confirmation. You can track status under Payments.' },
+  { q:'Can I pause or delete a listing?', a:'Yes — open My Listings and use the Pause or Delete action on any listing.' },
+];
+document.getElementById('faqWrap').innerHTML = FAQS.map((f,i) => `
+  <div class="faq-item" onclick="this.classList.toggle('open')">
+    <div class="faq-q"><span>${f.q}</span><i data-lucide="chevron-down" class="chev" style="width:16px;height:16px;"></i></div>
+    <div class="faq-a">${f.a}</div>
+  </div>`).join('');
+if (window.lucide) lucide.createIcons();
+
+document.getElementById('supportForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const tickets = flStore.get('farmlink-tickets', []);
+  tickets.unshift({ subject:e.target.subject.value, message:e.target.message.value, date:new Date().toISOString() });
+  flStore.set('farmlink-tickets', tickets);
+  flToast('Support ticket submitted — we\'ll get back within 24h');
+  e.target.reset();
+});
+</script>
+</body>
+</html>

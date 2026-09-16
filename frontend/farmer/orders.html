@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Orders</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="farmer-theme" data-page="orders">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebarMount"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <h1 data-i18n="nav.orders">Orders</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn" id="langToggleBtn"><i data-lucide="languages"></i></button>
+      </div>
+    </div>
+
+    <div class="tabs" id="orderTabs">
+      <button class="tab-btn active" data-status="all">All</button>
+      <button class="tab-btn" data-status="ACTION">Needs action</button>
+      <button class="tab-btn" data-status="IN TRANSIT">In transit</button>
+      <button class="tab-btn" data-status="PAID">Paid</button>
+    </div>
+
+    <div class="page-card" id="ordersWrap"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="langModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3 data-i18n="lang.title">Choose your language</h3><button class="modal-close" onclick="flCloseModal('langModal')">✕</button></div>
+    <div id="langOptionsWrap"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+<script>
+const FARMER_ID = '6aa96dcb80cc68a0dbb02fef';
+
+let orderFilter = 'all';
+let orders = [];
+
+async function loadOrders() {
+  try {
+    const response = await fetch('http://localhost:5000/api/orders');
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to load orders');
+    }
+
+    orders = data.orders.filter(
+      order => order.farmerId?._id === FARMER_ID ||
+               order.farmerId === FARMER_ID
+    );
+
+    renderOrdersPage();
+
+  } catch (error) {
+    console.error(error);
+
+    document.getElementById('ordersWrap').innerHTML =
+      '<div class="empty-state">Could not connect to FarmLink backend.</div>';
+  }
+}
+
+
+function renderOrdersPage() {
+  const filtered =
+    orderFilter === 'all'
+      ? orders
+      : orders.filter(o => o.orderStatus === orderFilter);
+
+  const badgeClass = {
+    'IN TRANSIT': 'badge-blue',
+    'DELIVERED': 'badge-green',
+    'CONFIRMED': 'badge-green',
+    'ACTION': 'badge-orange',
+    'CANCELLED': 'badge-gray'
+  };
+
+  document.getElementById('ordersWrap').innerHTML =
+    filtered.length
+      ? filtered.map(o => `
+        <div class="row-item">
+
+          <div class="row-left">
+            <div class="row-icon">📋</div>
+
+            <div>
+              <div class="row-title">
+                Order #${o.orderNumber}
+              </div>
+
+              <div class="row-sub">
+                ${o.items?.[0]?.crop || 'Crop'}
+                • ${Number(o.quantityKg).toLocaleString()} kg
+                • ₹${Number(o.totalAmount).toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-8" style="align-items:center;">
+            <span class="badge ${
+              badgeClass[o.orderStatus] || 'badge-gray'
+            }">
+              ${o.orderStatus}
+            </span>
+
+            ${
+              o.orderStatus === 'ACTION'
+                ? `<button
+                    class="btn btn-primary btn-sm"
+                    onclick="acceptOrder('${o._id}')">
+                    Accept
+                  </button>`
+                : ''
+            }
+          </div>
+
+        </div>
+      `).join('')
+      : '<div class="empty-state">No orders in this filter.</div>';
+
+  if (window.lucide) lucide.createIcons();
+
+  renderFarmerSidebar('orders');
+}
+
+
+async function acceptOrder(id) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/orders/${id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          orderStatus: 'IN TRANSIT'
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to accept order');
+    }
+
+    const order = orders.find(o => o._id === id);
+
+    if (order) {
+      order.orderStatus = 'IN TRANSIT';
+    }
+
+    flToast(`Order #${data.order.orderNumber} accepted — pickup scheduled`);
+
+    renderOrdersPage();
+
+  } catch (error) {
+    console.error(error);
+    flToast('Could not update order', 'error');
+  }
+}
+
+
+document.getElementById('orderTabs').addEventListener('click', e => {
+  if (!e.target.matches('.tab-btn')) return;
+
+  document
+    .querySelectorAll('#orderTabs .tab-btn')
+    .forEach(b => b.classList.remove('active'));
+
+  e.target.classList.add('active');
+
+  orderFilter = e.target.dataset.status;
+
+  renderOrdersPage();
+});
+
+
+loadOrders();
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+/* Farmer portal specific tweaks (base design system lives in ../shared/base.css) */
+.page-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:16px;}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}

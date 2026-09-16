@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — My Listings</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="farmer-theme" data-page="listings">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebarMount"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <h1 data-i18n="nav.listings">My Listings</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="window.location.href='sell-crop.html'"><i data-lucide="plus"></i> New listing</button>
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn" id="langToggleBtn"><i data-lucide="languages"></i></button>
+      </div>
+    </div>
+
+    <div class="tabs" id="statusTabs">
+      <button class="tab-btn active" data-status="all">All</button>
+      <button class="tab-btn" data-status="live">Live</button>
+      <button class="tab-btn" data-status="negotiating">Negotiating</button>
+      <button class="tab-btn" data-status="watching">Watching</button>
+      <button class="tab-btn" data-status="paused">Paused</button>
+    </div>
+
+    <div class="page-card" id="listingsWrap"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="langModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3 data-i18n="lang.title">Choose your language</h3><button class="modal-close" onclick="flCloseModal('langModal')">✕</button></div>
+    <div id="langOptionsWrap"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+<script>
+const icons = {
+  Onion: '🧅',
+  Tomato: '🍅',
+  Grapes: '🍇',
+  Wheat: '🌾'
+};
+
+const FARMER_ID = '6aa96dcb80cc68a0dbb02fef';
+
+let listingFilter = 'all';
+let listings = [];
+
+async function loadListings() {
+  try {
+    const response = await fetch('http://localhost:5000/api/listings');
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to load listings');
+    }
+
+    listings = data.listings.filter(
+      listing => listing.farmerId === FARMER_ID
+    );
+
+    renderListingsPage();
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById('listingsWrap').innerHTML =
+      '<div class="empty-state">Could not connect to FarmLink backend.</div>';
+  }
+}
+
+
+function renderListingsPage() {
+  const filtered =
+    listingFilter === 'all'
+      ? listings
+      : listings.filter(l => l.status === listingFilter);
+
+  document.getElementById('listingsWrap').innerHTML =
+    filtered.length
+      ? filtered.map(l => `
+        <div class="row-item">
+          <div class="row-left">
+            <div class="row-icon">
+              ${icons[l.crop] || '🌱'}
+            </div>
+
+            <div>
+              <div class="row-title">
+                ${l.crop} • ${l.quality}
+              </div>
+
+              <div class="row-sub">
+                ${Number(l.quantityKg).toLocaleString()} kg
+                • ₹${Number(l.askingPricePerQuintal).toLocaleString()}/q
+                • ${l.offersCount || 0} offers
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-8" style="align-items:center;">
+            <span class="badge badge-${
+              l.status === 'live'
+                ? 'green'
+                : l.status === 'negotiating'
+                  ? 'orange'
+                  : l.status === 'paused'
+                    ? 'gray'
+                    : 'blue'
+            }">
+              ${l.status}
+            </span>
+
+            <button
+              class="btn btn-ghost btn-sm"
+              onclick="toggleListing('${l._id}')">
+              ${l.status === 'paused' ? 'Resume' : 'Pause'}
+            </button>
+
+            <button
+              class="btn btn-danger btn-sm"
+              onclick="deleteListing('${l._id}')">
+              Delete
+            </button>
+          </div>
+        </div>
+      `).join('')
+      : '<div class="empty-state">No listings in this filter yet.</div>';
+
+  if (window.lucide) lucide.createIcons();
+  renderFarmerSidebar('listings');
+}
+
+
+async function toggleListing(id) {
+  const listing = listings.find(l => l._id === id);
+
+  if (!listing) return;
+
+  const newStatus =
+    listing.status === 'paused' ? 'live' : 'paused';
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/listings/${id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: newStatus
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to update listing');
+    }
+
+    listing.status = newStatus;
+
+    flToast(
+      newStatus === 'paused'
+        ? 'Listing paused'
+        : 'Listing resumed'
+    );
+
+    renderListingsPage();
+
+  } catch (error) {
+    console.error(error);
+    flToast('Could not update listing', 'error');
+  }
+}
+
+
+async function deleteListing(id) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/api/listings/${id}`,
+      {
+        method: 'DELETE'
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to delete listing');
+    }
+
+    listings = listings.filter(l => l._id !== id);
+
+    flToast('Listing deleted');
+
+    renderListingsPage();
+
+  } catch (error) {
+    console.error(error);
+    flToast('Could not delete listing', 'error');
+  }
+}
+
+
+document.getElementById('statusTabs').addEventListener('click', e => {
+  if (!e.target.matches('.tab-btn')) return;
+
+  document
+    .querySelectorAll('#statusTabs .tab-btn')
+    .forEach(b => b.classList.remove('active'));
+
+  e.target.classList.add('active');
+
+  listingFilter = e.target.dataset.status;
+
+  renderListingsPage();
+});
+
+
+loadListings();
+</script>
+</body>
+</html>

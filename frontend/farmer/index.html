@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Farmer Dashboard</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="farmer-theme" data-page="dashboard">
+
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebarMount"></aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <div>
+          <div class="datehead" id="dateHead">Wednesday, 09 September 2026 • Chhatrapati Sambhaji Nagar</div>
+          <h1 data-i18n="greeting">Good evening, Farmer 👋</h1>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-box">
+          <i data-lucide="search" style="width:16px;height:16px;"></i>
+          <input type="text" data-i18n-ph="searchph" placeholder="Search buyers, crops, orders...">
+        </div>
+        <button class="icon-btn" title="Notifications"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle theme"><span id="themeIcon"></span></button>
+        <button class="icon-btn" id="langToggleBtn" title="Language"><i data-lucide="languages"></i></button>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-badge"><span class="pulse"></span><span data-i18n="hero.badge">AI-Powered Direct Marketplace</span></div>
+        <h2><span data-i18n="hero.title1">Sell closer to the </span><em data-i18n="hero.title2">source</em><span data-i18n="hero.title3">. Keep more of the value.</span></h2>
+        <p data-i18n="hero.desc">Connect your harvest directly with verified consumers and bulk buyers. Farm-gate listings, demand intelligence and smarter logistics — without unnecessary middle layers.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="openSellModal()"><i data-lucide="plus"></i><span data-i18n="hero.btnList">List your harvest</span></button>
+          <button class="btn btn-ghost" onclick="goTo('marketplace.html')"><span data-i18n="hero.btnFind">Find buyers</span> →</button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="label" data-i18n="stat.sales">This month's direct sales</div>
+          <div class="value" id="dashMonthlySales">No data yet</div>
+          <div class="sub" id="dashMonthlySalesSub">From completed orders</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label" data-i18n="stat.demand">Active buyer demand</div>
+          <div class="value" id="dashActiveDemand">No data yet</div>
+          <div class="sub" id="dashActiveDemandSub">From open buyer requirements</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label">Average realized price</div>
+          <div class="value" id="dashRealizedPrice">No data yet</div>
+          <div class="sub">Based on your orders</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="label" data-i18n="stat.orders">Orders in progress</div>
+          <div class="value" id="dashOrdersProgress">No data yet</div>
+          <div class="sub" id="dashOrdersAction">From your active orders</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE MARKET STATS -->
+    <div class="grid grid-4">
+
+      <div class="stat-card">
+        <div class="label">Active buyer requirements</div>
+        <div class="value" id="dashRequirementCount">No data yet</div>
+        <div class="sub">Currently open</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Buyers seeking crops</div>
+        <div class="value" id="dashBuyerCount">No data yet</div>
+        <div class="sub">Based on live requirements</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Accepted connections</div>
+        <div class="value" id="dashConnectionCount">No data yet</div>
+        <div class="sub">Farmer ↔ buyer</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Logistics saving</div>
+        <div class="value" id="dashLogisticsSaving">No data yet</div>
+        <div class="sub">From recorded shipments</div>
+      </div>
+
+    </div>
+
+    <!-- AI/ML -->
+    <div class="grid grid-2" style="margin-top:16px;">
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>AI Demand Forecast</h3>
+            <p>ML-powered regional demand prediction</p>
+          </div>
+          <span class="badge badge-gray">MODEL PENDING</span>
+        </div>
+
+        <div class="empty-state" style="padding:48px 20px;">
+          <div style="font-size:32px;margin-bottom:10px;">🤖</div>
+          <div class="row-title">AI/ML forecast coming soon</div>
+          <div class="row-sub">
+            Predictions will appear here after the demand forecasting model is integrated.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>AI Selling Opportunity</h3>
+            <p>ML-based selling recommendations</p>
+          </div>
+          <span class="badge badge-gray">MODEL PENDING</span>
+        </div>
+
+        <div class="empty-state" style="padding:48px 20px;">
+          <div style="font-size:32px;margin-bottom:10px;">✨</div>
+          <div class="row-title">AI recommendations coming soon</div>
+          <div class="row-sub">
+            Recommendations will appear here once the trained AI/ML model is integrated.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BUYER OPPORTUNITIES + DEMAND MAP -->
+    <div class="grid grid-2" style="margin-top:16px;">
+      <div class="card">
+        <div class="card-head">
+          <div><h3 data-i18n="buyer.title">Direct buyer opportunities</h3><p data-i18n="buyer.sub">Best matches for your 5T Grade-A onion lot</p></div>
+          <a class="link" href="marketplace.html"><span data-i18n="buyer.viewall">View all 18</span> →</a>
+        </div>
+        <div id="buyerOppList"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><h3 data-i18n="demand.title">Where demand is strongest</h3><p data-i18n="demand.sub">AI-ranked buyer clusters</p></div>
+          <a class="link" href="route-optimizer.html"><span data-i18n="demand.map">Open map</span> →</a>
+        </div>
+        <div id="demandMapList">
+          <div class="empty-state">Loading live buyer demand...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROUTE OPTIMIZER -->
+    <div class="card" style="margin-top:16px;">
+      <div class="card-head">
+        <div>
+          <h3>AI Route Optimizer</h3>
+          <p>Optimize transport after shipment data is available</p>
+        </div>
+        <span class="badge badge-gray">MODEL PENDING</span>
+      </div>
+
+      <div class="empty-state" style="padding:40px 20px;">
+        <div style="font-size:32px;margin-bottom:10px;">🚚</div>
+        <div class="row-title">Route optimization coming soon</div>
+        <div class="row-sub">
+          Route, distance and transport savings will be calculated from real shipment data.
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTINGS + IMPACT -->
+    <div class="grid grid-2" style="margin-top:16px;">
+      <div class="card">
+        <div class="card-head">
+          <div><h3 data-i18n="listings.title">My active listings</h3><p data-i18n="listings.sub">Harvest available to buyers</p></div>
+          <a class="link" href="listings.html">→</a>
+        </div>
+        <div id="dashListings"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3 data-i18n="impact.title">Impact this month</h3><p data-i18n="impact.sub">Value retained by going direct</p></div></div>
+        <div id="impactData">
+          <div class="empty-state" style="padding:30px 20px;">
+            Impact metrics will appear from completed transactions and delivery data.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="section-title" data-i18n="quick.title">Quick actions</div>
+    <div class="grid grid-4">
+      <button class="card" style="text-align:left;border:none;" onclick="openSellModal()">
+        <i data-lucide="package-plus" style="color:var(--accent-text);margin-bottom:8px;"></i>
+        <div class="row-title" data-i18n="quick.list.title">List your harvest</div>
+        <div class="row-sub" data-i18n="quick.list.sub">Reach direct buyers</div>
+      </button>
+      <button class="card" style="text-align:left;border:none;" onclick="goTo('marketplace.html')">
+        <i data-lucide="search" style="color:var(--accent-text);margin-bottom:8px;"></i>
+        <div class="row-title" data-i18n="quick.buyers.title">Find bulk buyers</div>
+        <div class="row-sub" data-i18n="quick.buyers.sub">Browse active demand</div>
+      </button>
+      <button class="card" style="text-align:left;border:none;" onclick="goTo('route-optimizer.html')">
+        <i data-lucide="route" style="color:var(--accent-text);margin-bottom:8px;"></i>
+        <div class="row-title" data-i18n="quick.optimize.title">Optimize delivery</div>
+        <div class="row-sub" data-i18n="quick.optimize.sub">Reduce transport cost</div>
+      </button>
+      <button class="card" style="text-align:left;border:none;" onclick="goTo('orders.html')">
+        <i data-lucide="clipboard-list" style="color:var(--accent-text);margin-bottom:8px;"></i>
+        <div class="row-title" data-i18n="quick.manage.title">Manage orders</div>
+        <div class="row-sub"><span data-i18n="quick.manage.sub">Manage your active orders</span></div>
+      </button>
+    </div>
+
+    <!-- RECENT ORDERS + TRUST -->
+    <div class="grid grid-2" style="margin-top:16px;">
+      <div class="card">
+        <div class="card-head"><h3 data-i18n="recent.title">Recent orders</h3><a class="link" href="orders.html">→</a></div>
+        <div id="dashOrders"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3 data-i18n="trust.title">Trust & payment health</h3><span class="badge badge-green" data-i18n="trust.status">Healthy</span></div>
+        <div id="trustPaymentData">
+          <div class="empty-state" style="padding:30px 20px;">
+            Trust and payment metrics will appear from verified transaction data.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- SELL HARVEST MODAL -->
+<div class="modal-overlay" id="sellModal">
+  <div class="modal">
+    <div class="modal-head"><h3 data-i18n="modal.sell.title">List your harvest</h3><button class="modal-close" onclick="closeSellModal()">✕</button></div>
+    <form id="sellForm">
+      <div class="field">
+        <label data-i18n="modal.sell.crop">Crop</label>
+        <select name="crop"><option>Onion</option><option>Tomato</option><option>Grapes</option><option>Wheat</option></select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label data-i18n="modal.sell.qty">Quantity (kg)</label><input type="number" name="qty" placeholder="5000"></div>
+        <div class="field"><label data-i18n="modal.sell.price">Asking price /q</label><input type="text" name="price" placeholder="₹2,950"></div>
+      </div>
+      <div class="field">
+        <label data-i18n="modal.sell.quality">Quality</label>
+        <div class="chip-group">
+          <button type="button" class="chip selected" onclick="selectChip(this.parentElement,'Grade A','quality')">Grade A</button>
+          <button type="button" class="chip" onclick="selectChip(this.parentElement,'Premium','quality')">Premium</button>
+          <button type="button" class="chip" onclick="selectChip(this.parentElement,'Grade B','quality')">Grade B</button>
+        </div>
+      </div>
+      <div class="field"><label data-i18n="modal.sell.from">Available from</label><input type="date" name="availfrom"></div>
+      <div class="field">
+        <label data-i18n="modal.sell.delivery">Delivery mode</label>
+        <div class="chip-group">
+          <button type="button" class="chip selected" onclick="selectChip(this.parentElement,'Buyer pickup','delivery')" data-i18n="modal.sell.pickup">Buyer pickup</button>
+          <button type="button" class="chip" onclick="selectChip(this.parentElement,'Platform logistics','delivery')" data-i18n="modal.sell.platform">Platform logistics</button>
+          <button type="button" class="chip" onclick="selectChip(this.parentElement,'Self delivery','delivery')" data-i18n="modal.sell.self">Self delivery</button>
+        </div>
+      </div>
+      <div class="field"><label data-i18n="modal.sell.packaging">Packaging details</label><textarea name="packaging" rows="2" placeholder="Jute bags, 50kg each"></textarea></div>
+      <button type="submit" class="btn btn-primary btn-block"><span data-i18n="modal.sell.publish">Publish to verified buyers</span> →</button>
+    </form>
+  </div>
+</div>
+
+<!-- LANGUAGE MODAL -->
+<div class="modal-overlay" id="langModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3 data-i18n="lang.title">Choose your language</h3><button class="modal-close" onclick="flCloseModal('langModal')">✕</button></div>
+    <div id="langOptionsWrap"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+<script>
+async function renderDashboardLists(){
+  const FARMER_ID = '6aa96dcb80cc68a0dbb02fef';
+
+  try {
+    const [listingRes, orderRes, requirementRes] = await Promise.all([
+      fetch('http://localhost:5000/api/listings'),
+      fetch('http://localhost:5000/api/orders'),
+      fetch('http://localhost:5000/api/requirements')
+    ]);
+
+    const listingData = await listingRes.json();
+    const orderData = await orderRes.json();
+    const requirementData = await requirementRes.json();
+
+    const listings = (listingData.listings || []).filter(
+      l => String(l.farmerId?._id || l.farmerId) === FARMER_ID
+    );
+
+    const orders = (orderData.orders || []).filter(
+      o => String(o.farmerId?._id || o.farmerId) === FARMER_ID
+    );
+
+    const requirements = (requirementData.requirements || []).filter(
+      r => r.status === 'OPEN'
+    );
+
+    /* =========================
+       ACTIVE LISTINGS
+    ========================= */
+
+    const listingIcons = {
+      Onion:'🧅',
+      Tomato:'🍅',
+      Grapes:'🍇',
+      Wheat:'🌾'
+    };
+
+    const statusBadge = {
+      live:'<span class="badge badge-green">Live</span>',
+      negotiating:'<span class="badge badge-orange">Negotiating</span>',
+      watching:'<span class="badge badge-blue">Watching</span>',
+      paused:'<span class="badge badge-gray">Paused</span>',
+      closed:'<span class="badge badge-gray">Closed</span>'
+    };
+
+    document.getElementById('dashListings').innerHTML =
+      listings.length
+        ? listings.slice(0,3).map(l => `
+          <div class="row-item">
+            <div class="row-left">
+              <div class="row-icon">${listingIcons[l.crop] || '🌱'}</div>
+              <div>
+                <div class="row-title">${l.crop} • ${l.quality}</div>
+                <div class="row-sub">
+                  ${Number(l.quantityKg || 0).toLocaleString()} kg • ${l.offersCount || 0} offers
+                </div>
+              </div>
+            </div>
+            ${statusBadge[l.status] || ''}
+          </div>
+        `).join('')
+        : `<div class="empty-state">No listings yet.</div>`;
+
+    /* =========================
+       RECENT ORDERS
+    ========================= */
+
+    const orderBadge = {
+      'IN TRANSIT':'badge-blue',
+      'PAID':'badge-green',
+      'CONFIRMED':'badge-green',
+      'DELIVERED':'badge-green',
+      'ACTION':'badge-orange',
+      'CANCELLED':'badge-gray'
+    };
+
+    document.getElementById('dashOrders').innerHTML =
+      orders.length
+        ? orders.slice(0,3).map(o => {
+            const crop = o.items?.[0]?.crop || 'Crop';
+            const qty = o.quantityKg || o.items?.[0]?.quantityKg || 0;
+            const buyer = o.buyerId?.name || 'Buyer';
+
+            return `
+              <div class="row-item">
+                <div class="row-left">
+                  <div class="row-icon">📋</div>
+                  <div>
+                    <div class="row-title">
+                      Order #${o.orderNumber} • ${buyer}
+                    </div>
+                    <div class="row-sub">
+                      ${crop} • ${Number(qty).toLocaleString()} kg
+                    </div>
+                  </div>
+                </div>
+
+                <span class="badge ${orderBadge[o.orderStatus] || 'badge-gray'}">
+                  ${o.orderStatus}
+                </span>
+              </div>
+            `;
+          }).join('')
+        : `<div class="empty-state">No orders yet.</div>`;
+
+    /* =========================
+       BUYER OPPORTUNITIES
+    ========================= */
+
+    const opportunities = [];
+
+    listings
+      .filter(l => l.status !== 'closed' && l.status !== 'paused')
+      .forEach(listing => {
+
+        requirements
+          .filter(r =>
+            String(r.crop).toLowerCase() === String(listing.crop).toLowerCase() &&
+            String(r.quality).toLowerCase() === String(listing.quality).toLowerCase()
+          )
+          .forEach(r => {
+            opportunities.push({
+              buyer: r.buyerId?.name || 'Buyer',
+              crop: r.crop,
+              required: Number(r.requiredQuantityKg || 0),
+              available: Number(listing.quantityKg || 0),
+              minPrice: Number(r.minPrice || 0),
+              maxPrice: Number(r.maxPrice || 0),
+              region: r.region || 'Region not specified'
+            });
+          });
+      });
+
+    document.getElementById('buyerOppList').innerHTML =
+      opportunities.length
+        ? opportunities.slice(0,3).map(o => `
+          <div class="row-item">
+            <div class="row-left">
+              <div class="row-icon">🤝</div>
+              <div>
+                <div class="row-title">${o.buyer} • ${o.crop}</div>
+                <div class="row-sub">
+                  Wants ${o.required.toLocaleString('en-IN')} kg •
+                  You have ${o.available.toLocaleString('en-IN')} kg •
+                  ${o.region}
+                </div>
+              </div>
+            </div>
+
+            <span class="badge badge-green">
+              ₹${o.minPrice.toLocaleString('en-IN')}–₹${o.maxPrice.toLocaleString('en-IN')}/q
+            </span>
+          </div>
+        `).join('')
+        : `<div class="empty-state">No matching buyer requirements yet.</div>`;
+
+  } catch (error) {
+    console.error('Dashboard data error:', error);
+
+    document.getElementById('dashListings').innerHTML =
+      `<div class="empty-state">Unable to load listings.</div>`;
+
+    document.getElementById('dashOrders').innerHTML =
+      `<div class="empty-state">Unable to load orders.</div>`;
+
+    document.getElementById('buyerOppList').innerHTML =
+      `<div class="empty-state">Unable to load buyer opportunities.</div>`;
+  }
+}
+
+async function loadLiveDashboardStats() {
+  try {
+    const [ordersRes, requirementsRes, connectionsRes, shipmentsRes] =
+      await Promise.all([
+        fetch('http://localhost:5000/api/orders'),
+        fetch('http://localhost:5000/api/requirements'),
+        fetch('http://localhost:5000/api/connections'),
+        fetch('http://localhost:5000/api/shipments')
+      ]);
+
+    const ordersData = await ordersRes.json();
+    const requirementsData = await requirementsRes.json();
+    const connectionsData = await connectionsRes.json();
+    const shipmentsData = await shipmentsRes.json();
+
+    const orders = (ordersData.orders || []).filter(
+      o => String(o.farmerId?._id || o.farmerId) === '6aa96dcb80cc68a0dbb02fef'
+    );
+
+    const requirements = (requirementsData.requirements || []).filter(
+      r => r.status === 'OPEN'
+    );
+
+    const connections = (connectionsData.connections || []).filter(
+      c => String(c.farmerId?._id || c.farmerId) === '6aa96dcb80cc68a0dbb02fef'
+    );
+
+    const shipments = shipmentsData.shipments || [];
+
+    /* Monthly sales */
+    const now = new Date();
+
+    const monthlySales = orders
+      .filter(o => {
+        const date = new Date(o.createdAt);
+        return (
+          date.getMonth() === now.getMonth() &&
+          date.getFullYear() === now.getFullYear() &&
+          (
+            ['PAID', 'DELIVERED'].includes(o.orderStatus) ||
+            o.paymentStatus === 'PAID'
+          )
+        );
+      })
+      .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0);
+
+    document.getElementById('dashMonthlySales').textContent =
+      monthlySales > 0
+        ? '₹' + monthlySales.toLocaleString('en-IN')
+        : 'No data yet';
+
+    /* Active buyer demand */
+    const demandKg = requirements.reduce(
+      (sum, r) => sum + Number(r.requiredQuantityKg || 0),
+      0
+    );
+
+    document.getElementById('dashActiveDemand').textContent =
+      demandKg > 0
+        ? demandKg >= 1000
+          ? (demandKg / 1000).toFixed(1) + 'T'
+          : demandKg.toLocaleString('en-IN') + ' kg'
+        : 'No data yet';
+
+    /* Average realized price */
+    const pricedOrders = orders.filter(
+      o => Number(o.quantityKg) > 0 && Number(o.totalAmount) > 0
+    );
+
+    const avgPricePerKg = pricedOrders.length
+      ? pricedOrders.reduce(
+          (sum, o) => sum + Number(o.totalAmount) / Number(o.quantityKg),
+          0
+        ) / pricedOrders.length
+      : 0;
+
+    document.getElementById('dashRealizedPrice').textContent =
+      avgPricePerKg > 0
+        ? '₹' + avgPricePerKg.toFixed(2) + '/kg'
+        : 'No data yet';
+
+    /* Orders in progress */
+    const activeOrders = orders.filter(
+      o => !['DELIVERED', 'CANCELLED'].includes(o.orderStatus)
+    );
+
+    const actionOrders = orders.filter(
+      o => o.orderStatus === 'ACTION'
+    );
+
+    document.getElementById('dashOrdersProgress').textContent =
+      activeOrders.length || '0';
+
+    document.getElementById('dashOrdersAction').textContent =
+      actionOrders.length
+        ? `${actionOrders.length} need your action`
+        : 'No action required';
+
+    /* Buyer requirements */
+    document.getElementById('dashRequirementCount').textContent =
+      requirements.length || '0';
+
+    const buyerIds = new Set(
+      requirements
+        .map(r => r.buyerId?._id || r.buyerId)
+        .filter(Boolean)
+        .map(String)
+    );
+
+    document.getElementById('dashBuyerCount').textContent =
+      buyerIds.size || '0';
+
+    /* Accepted connections */
+    const acceptedConnections = connections.filter(
+      c => c.status === 'ACCEPTED'
+    );
+
+    document.getElementById('dashConnectionCount').textContent =
+      acceptedConnections.length || '0';
+
+    /* Logistics saving */
+    const validShipments = shipments.filter(
+      s =>
+        Number(s.estimatedCost) > 0 &&
+        Number(s.optimizedCost) > 0 &&
+        Number(s.estimatedCost) >= Number(s.optimizedCost)
+    );
+
+    if (validShipments.length) {
+      const estimatedTotal = validShipments.reduce(
+        (sum, s) => sum + Number(s.estimatedCost),
+        0
+      );
+
+      const optimizedTotal = validShipments.reduce(
+        (sum, s) => sum + Number(s.optimizedCost),
+        0
+      );
+
+      const saving =
+        ((estimatedTotal - optimizedTotal) / estimatedTotal) * 100;
+
+      document.getElementById('dashLogisticsSaving').textContent =
+        saving.toFixed(1) + '%';
+    } else {
+      document.getElementById('dashLogisticsSaving').textContent =
+        'No data yet';
+    }
+
+  } catch (error) {
+    console.error('Live dashboard stats error:', error);
+  }
+}
+
+async function loadLiveDemandMap() {
+  try {
+    const response = await fetch('http://localhost:5000/api/requirements');
+    const data = await response.json();
+
+    const requirements = (data.requirements || []).filter(
+      r => r.status === 'OPEN'
+    );
+
+    const container = document.getElementById('demandMapList');
+
+    if (!requirements.length) {
+      container.innerHTML =
+        '<div class="empty-state">No active buyer demand yet.</div>';
+      return;
+    }
+
+    const regions = {};
+
+    requirements.forEach(r => {
+      const region = r.region || 'Region not specified';
+
+      if (!regions[region]) {
+        regions[region] = {
+          buyers: new Set(),
+          quantities: [],
+          prices: []
+        };
+      }
+
+      const buyerId = r.buyerId?._id || r.buyerId;
+
+      if (buyerId) {
+        regions[region].buyers.add(String(buyerId));
+      }
+
+      if (Number(r.requiredQuantityKg) > 0) {
+        regions[region].quantities.push(Number(r.requiredQuantityKg));
+      }
+
+      if (Number(r.minPrice) > 0) {
+        regions[region].prices.push(Number(r.minPrice));
+      }
+
+      if (Number(r.maxPrice) > 0) {
+        regions[region].prices.push(Number(r.maxPrice));
+      }
+    });
+
+    const sortedRegions = Object.entries(regions)
+      .sort((a, b) => {
+        const qtyA = a[1].quantities.reduce((x, y) => x + y, 0);
+        const qtyB = b[1].quantities.reduce((x, y) => x + y, 0);
+        return qtyB - qtyA;
+      })
+      .slice(0, 5);
+
+    container.innerHTML = sortedRegions.map(([region, data]) => {
+      const totalQty = data.quantities.reduce((a, b) => a + b, 0);
+
+      const minPrice = data.prices.length
+        ? Math.min(...data.prices)
+        : null;
+
+      const maxPrice = data.prices.length
+        ? Math.max(...data.prices)
+        : null;
+
+      const demandLevel =
+        totalQty >= 5000 ? 'High' :
+        totalQty >= 2000 ? 'Medium' :
+        'Stable';
+
+      const badge =
+        demandLevel === 'High'
+          ? 'badge-green'
+          : demandLevel === 'Medium'
+            ? 'badge-orange'
+            : 'badge-gray';
+
+      const priceText =
+        minPrice && maxPrice
+          ? `₹${minPrice.toLocaleString('en-IN')}–₹${maxPrice.toLocaleString('en-IN')}/q`
+          : 'Price not specified';
+
+      return `
+        <div class="row-item">
+          <div class="row-left">
+            <div class="row-icon">📍</div>
+            <div>
+              <div class="row-title">${region}</div>
+              <div class="row-sub">
+                ${priceText} · ${data.buyers.size} buyer(s) · ${totalQty.toLocaleString('en-IN')} kg
+              </div>
+            </div>
+          </div>
+          <span class="badge ${badge}">${demandLevel}</span>
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Demand map error:', error);
+
+    document.getElementById('demandMapList').innerHTML =
+      '<div class="empty-state">Unable to load buyer demand.</div>';
+  }
+}
+
+loadLiveDashboardStats();
+renderDashboardLists();
+loadLiveDemandMap();
+
+const d = new Date();
+
+document.getElementById('dateHead').textContent =
+  d.toLocaleDateString('en-IN',{
+    weekday:'long',
+    day:'2-digit',
+    month:'long',
+    year:'numeric'
+  }) + ' • Chhatrapati Sambhaji Nagar';
+</script>
+</body>
+</html>

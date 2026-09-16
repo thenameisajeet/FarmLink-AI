@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Consumer Marketplace</title>
+<link rel="stylesheet" href="shared/base.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;}
+.prod-tag{position:absolute;top:12px;left:12px;background:var(--accent-soft);color:var(--accent-text);font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.3px;}
+.prod-img{font-size:44px;text-align:center;padding:20px 0;}
+.prod-name{font-weight:700;font-size:13.5px;}
+.prod-sub{font-size:11.5px;color:var(--text-faint);margin-bottom:8px;}
+.prod-foot{display:flex;justify-content:space-between;align-items:center;}
+.qty-btn{width:30px;height:30px;border-radius:9px;background:var(--accent);color:#08110c;border:none;font-weight:800;font-size:15px;}
+.qty-ctrl{display:flex;align-items:center;gap:8px;}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;cursor:pointer;}
+.cat-card:hover{border-color:var(--accent);}
+.cat-emoji{font-size:26px;margin-bottom:8px;}
+</style>
+</head>
+<body class="consumer-theme" data-page="home">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" style="border-radius:50%;">F</div>
+      <div class="brand-text"><div class="name">FarmLink AI</div><div class="tag">Consumer Marketplace</div></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Discover</div>
+      <a class="nav-item active" data-sec="home" href="#"><i data-lucide="home"></i><span>Home</span></a>
+      <a class="nav-item" data-sec="produce" href="#"><i data-lucide="carrot"></i><span>Fresh Produce</span></a>
+      <a class="nav-item" data-sec="farmdirect" href="#"><i data-lucide="tractor"></i><span>Farm Direct</span></a>
+      <a class="nav-item" data-sec="cart" href="#"><i data-lucide="shopping-cart"></i><span>My Cart</span><span class="count" id="cartCount">0</span></a>
+      <a class="nav-item" data-sec="orders" href="#"><i data-lucide="package"></i><span>My Orders</span></a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Account</div>
+      <a class="nav-item" data-sec="saved" href="#"><i data-lucide="heart"></i><span>Saved Items</span></a>
+      <a class="nav-item" data-sec="payments" href="#"><i data-lucide="credit-card"></i><span>Payments</span></a>
+      <a class="nav-item" data-sec="reviews" href="#"><i data-lucide="star"></i><span>My Reviews</span></a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar-chip">CU</div>
+      <div><div class="who">Consumer</div><div class="sub">Verified account</div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <div>
+          <h1 id="pageHeading">Fresh choices, delivered.</h1>
+          <div class="text-faint" style="font-size:12.5px;" id="pageSub">Discover quality produce through FarmLink's connected supply network.</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-box"><i data-lucide="search" style="width:15px;height:15px;"></i><input placeholder="Search fruits, vegetables, grains..."></div>
+        <button class="icon-btn" style="width:auto;padding:0 12px;font-weight:800;font-size:12px;"><i data-lucide="languages" style="margin-right:5px;"></i>EN</button>
+        <button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn" onclick="switchSection('cart')"><i data-lucide="shopping-cart"></i></button>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <section id="sec-home">
+      <div class="hero">
+        <div class="hero-left">
+          <div class="hero-badge"><span class="pulse"></span>FARMLINK DIRECT</div>
+          <h2>Fresh from the farm.<br>Straight to your table.</h2>
+          <p>Shop quality agricultural products connected through verified farmers, vendors and FarmLink logistics.</p>
+          <button class="btn btn-primary" onclick="switchSection('produce')">Start Shopping →</button>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:repeat(6,1fr);gap:14px;" id="catGrid"></div>
+
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-head"><div><h3>Recommended for you</h3><p>Fresh products available through FarmLink</p></div><a class="link" href="#" onclick="switchSection('produce')">VIEW ALL →</a></div>
+          <div class="grid grid-3" id="recoGrid"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Your Delivery</h3><span class="badge badge-green">ON TIME</span></div>
+          <div class="text-faint" style="font-size:12px;margin-bottom:10px;">Order #FL-C2841</div>
+          <div class="flex gap-8" style="margin-bottom:14px;"><div class="row-icon">🚚</div><div><div class="row-title">Arriving tomorrow</div><div class="row-sub">Your order is moving through the FarmLink network.</div></div></div>
+          <div class="flex" style="justify-content:space-between;text-align:center;font-size:11px;color:var(--text-faint);">
+            <div>🚜<br>Farm</div><div>🏭<br>Vendor</div><div>🚚<br>Transit</div><div>🏠<br>You</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head"><div><h3>Recent Orders</h3><p>Your latest FarmLink purchases</p></div><a class="link" href="#" onclick="switchSection('orders')">ALL ORDERS →</a></div>
+        <div id="recentOrdersWrap"></div>
+      </div>
+    </section>
+
+    <!-- FRESH PRODUCE / FARM DIRECT -->
+    <section id="sec-produce" style="display:none;">
+      <div class="grid grid-4" id="allProductsGrid"></div>
+    </section>
+    <section id="sec-farmdirect" style="display:none;">
+      <div class="grid grid-4" id="farmDirectGrid"></div>
+    </section>
+
+    <!-- CART -->
+    <section id="sec-cart" style="display:none;">
+      <div class="grid grid-2">
+        <div class="card" id="cartWrap"></div>
+        <div class="card">
+          <h3 style="margin-bottom:12px;">Order summary</h3>
+          <div class="row-item"><span class="text-faint">Subtotal</span><b id="cartSubtotal">₹0</b></div>
+          <div class="row-item"><span class="text-faint">Delivery</span><b>₹20</b></div>
+          <div class="row-item"><span class="text-faint">Total</span><b id="cartTotal">₹0</b></div>
+          <button class="btn btn-primary btn-block" style="margin-top:12px;" onclick="checkout()">Checkout</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="sec-orders" style="display:none;">
+      <div class="card"><div class="card-head"><h3>My Orders</h3></div><div id="allOrdersWrap"></div></div>
+    </section>
+
+    <!-- SAVED -->
+    <section id="sec-saved" style="display:none;">
+      <div class="card" id="savedWrap"><div class="empty-state"><i data-lucide="heart"></i><p>No saved items yet. Tap the heart on a product to save it.</p></div></div>
+    </section>
+
+    <!-- PAYMENTS -->
+    <section id="sec-payments" style="display:none;">
+      <div class="card"><div class="card-head"><h3>Payment methods</h3></div>
+        <div class="row-item"><span class="text-faint">UPI</span><b>farmer@upi</b></div>
+        <div class="row-item"><span class="text-faint">Card ending</span><b>•••• 4821</b></div>
+        <button class="btn btn-ghost" style="margin-top:10px;" onclick="flToast('Add payment method flow coming soon')">+ Add payment method</button>
+      </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section id="sec-reviews" style="display:none;">
+      <div class="card"><div class="card-head"><h3>My Reviews</h3></div>
+        <div class="row-item"><div><div class="row-title">Fresh Tomato</div><div class="row-sub">"Very fresh, arrived on time."</div></div><span class="badge badge-green">★★★★★</span></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="shared/shared.js"></script>
+<script>
+const PAGE_META = {
+  home:{h:'Fresh choices, delivered.', s:"Discover quality produce through FarmLink's connected supply network."},
+  produce:{h:'Fresh Produce', s:'Browse all fruits, vegetables, grains, pulses and more'},
+  farmdirect:{h:'Farm Direct', s:'Products connected straight from verified farmers'},
+  cart:{h:'My Cart', s:'Review items before checkout'},
+  orders:{h:'My Orders', s:'Track your FarmLink purchases'},
+  saved:{h:'Saved Items', s:'Products you have saved for later'},
+  payments:{h:'Payments', s:'Manage your payment methods'},
+  reviews:{h:'My Reviews', s:'Reviews you have left for products'},
+};
+function switchSection(id){
+  document.querySelectorAll('main section').forEach(s => s.style.display = 'none');
+  document.getElementById('sec-'+id).style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.querySelector(`.nav-item[data-sec="${id}"]`);
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('pageHeading').textContent = PAGE_META[id].h;
+  document.getElementById('pageSub').textContent = PAGE_META[id].s;
+  if (id==='cart') renderCart();
+  if (id==='orders') renderAllOrders();
+  flCloseMobileMenu();
+}
+document.querySelectorAll('.nav-item[data-sec]').forEach(el => {
+  el.addEventListener('click', e => { e.preventDefault(); switchSection(el.dataset.sec); });
+});
+
+const CATEGORIES = [
+  {emoji:'🥬', name:'Vegetables', count:86}, {emoji:'🍎', name:'Fruits', count:54},
+  {emoji:'🌾', name:'Grains', count:42}, {emoji:'🫘', name:'Pulses', count:37},
+  {emoji:'🥛', name:'Dairy', count:21}, {emoji:'🌱', name:'Organic', count:68},
+];
+document.getElementById('catGrid').innerHTML = CATEGORIES.map(c => `
+  <div class="cat-card" onclick="switchSection('produce')"><div class="cat-emoji">${c.emoji}</div>
+  <div class="row-title" style="font-size:12.5px;">${c.name}</div><div class="text-faint" style="font-size:10.5px;">${c.count} products</div></div>`).join('');
+
+const PRODUCTS = [
+  {id:'p1', emoji:'🍅', name:'Fresh Tomato', tag:'FARM DIRECT', price:28, unit:'kg'},
+  {id:'p2', emoji:'🥔', name:'Fresh Potato', tag:'FARM DIRECT', price:32, unit:'kg'},
+  {id:'p3', emoji:'🧅', name:'Fresh Onion', tag:'FARM DIRECT', price:31, unit:'kg'},
+  {id:'p4', emoji:'🍎', name:'Fresh Apples', tag:'VERIFIED VENDOR', price:145, unit:'kg'},
+  {id:'p5', emoji:'🫘', name:'Premium Soybean', tag:'FARM DIRECT', price:52, unit:'kg'},
+  {id:'p6', emoji:'🍇', name:'Fresh Grapes', tag:'FARM DIRECT', price:58, unit:'kg'},
+  {id:'p7', emoji:'🌾', name:'Wheat Flour', tag:'VERIFIED VENDOR', price:38, unit:'kg'},
+  {id:'p8', emoji:'🥛', name:'Fresh Milk', tag:'VERIFIED VENDOR', price:56, unit:'L'},
+];
+function productCard(p){
+  return `<div class="prod-card"><span class="prod-tag">${p.tag}</span>
+    <div class="prod-img">${p.emoji}</div>
+    <div class="prod-name">${p.name}</div><div class="prod-sub">Verified FarmLot</div>
+    <div class="prod-foot"><b>₹${p.price}<span class="text-faint" style="font-weight:400;">/${p.unit}</span></b>
+    <button class="qty-btn" onclick="addToCart('${p.id}')">+</button></div></div>`;
+}
+document.getElementById('recoGrid').innerHTML = PRODUCTS.slice(0,3).map(productCard).join('');
+document.getElementById('allProductsGrid').innerHTML = PRODUCTS.map(productCard).join('');
+document.getElementById('farmDirectGrid').innerHTML = PRODUCTS.filter(p=>p.tag==='FARM DIRECT').map(productCard).join('');
+
+/* ---------- Cart ---------- */
+function getCart(){ return flStore.get('consumer-cart', {}); }
+function setCart(c){ flStore.set('consumer-cart', c); updateCartBadge(); }
+function addToCart(id){
+  const cart = getCart();
+  cart[id] = (cart[id]||0) + 1;
+  setCart(cart);
+  const p = PRODUCTS.find(x=>x.id===id);
+  flToast(`${p.name} added to cart`);
+}
+function updateCartBadge(){
+  const cart = getCart();
+  const total = Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById('cartCount').textContent = total;
+}
+function renderCart(){
+  const cart = getCart();
+  const ids = Object.keys(cart).filter(id => cart[id] > 0);
+  if (!ids.length){
+    document.getElementById('cartWrap').innerHTML = '<div class="empty-state"><i data-lucide="shopping-cart"></i><p>Your cart is empty.</p></div>';
+    if (window.lucide) lucide.createIcons();
+    document.getElementById('cartSubtotal').textContent = '₹0';
+    document.getElementById('cartTotal').textContent = '₹0';
+    return;
+  }
+  let subtotal = 0;
+  document.getElementById('cartWrap').innerHTML = '<h3 style="margin-bottom:12px;">Cart items</h3>' + ids.map(id => {
+    const p = PRODUCTS.find(x=>x.id===id);
+    const lineTotal = p.price * cart[id];
+    subtotal += lineTotal;
+    return `<div class="row-item"><div class="row-left"><div class="row-icon">${p.emoji}</div>
+      <div><div class="row-title">${p.name}</div><div class="row-sub">₹${p.price}/${p.unit}</div></div></div>
+      <div class="qty-ctrl">
+        <button class="btn btn-ghost btn-sm" onclick="changeQty('${id}',-1)">-</button>
+        <b>${cart[id]}</b>
+        <button class="btn btn-ghost btn-sm" onclick="changeQty('${id}',1)">+</button>
+        <b style="margin-left:10px;min-width:60px;text-align:right;">₹${lineTotal}</b>
+      </div></div>`;
+  }).join('');
+  document.getElementById('cartSubtotal').textContent = '₹'+subtotal;
+  document.getElementById('cartTotal').textContent = '₹'+(subtotal+20);
+}
+function changeQty(id, delta){
+  const cart = getCart();
+  cart[id] = (cart[id]||0) + delta;
+  if (cart[id] <= 0) delete cart[id];
+  setCart(cart);
+  renderCart();
+}
+function checkout(){
+  const cart = getCart();
+  const ids = Object.keys(cart);
+  if (!ids.length){ flToast('Your cart is empty', 'error'); return; }
+  const orders = flStore.get('consumer-orders', []);
+  const items = ids.map(id => { const p = PRODUCTS.find(x=>x.id===id); return `${cart[id]}${p.unit} ${p.name}`; }).join(', ');
+  orders.unshift({ id:'FL-C'+Math.floor(Math.random()*9000+1000), items, status:'PROCESSING', date:new Date().toLocaleDateString() });
+  flStore.set('consumer-orders', orders);
+  setCart({});
+  flToast('Order placed! Track it under My Orders.');
+  switchSection('orders');
+}
+updateCartBadge();
+
+/* ---------- Orders ---------- */
+const DEFAULT_ORDERS = [
+  {id:'FL-C2841', items:'2kg Fresh Tomato', status:'IN TRANSIT', date:'Today', price:56},
+  {id:'FL-C2839', items:'1kg Fresh Apples', status:'DELIVERED', date:'2 days ago', price:145},
+  {id:'FL-C2830', items:'2kg Premium Soybean', status:'DELIVERED', date:'5 days ago', price:104},
+];
+function renderRecentOrders(){
+  const orders = flStore.get('consumer-orders', []).concat(DEFAULT_ORDERS).slice(0,3);
+  document.getElementById('recentOrdersWrap').innerHTML = orders.map(o => `
+    <div class="row-item"><div class="row-left"><div class="row-icon">📦</div><div><div class="row-title">${o.items}</div><div class="row-sub">${o.date}</div></div></div>
+    <span class="badge ${o.status==='DELIVERED'?'badge-green':o.status==='IN TRANSIT'?'badge-blue':'badge-orange'}">${o.status}</span></div>`).join('');
+}
+function renderAllOrders(){
+  const orders = flStore.get('consumer-orders', []).concat(DEFAULT_ORDERS);
+  document.getElementById('allOrdersWrap').innerHTML = orders.map(o => `
+    <div class="row-item"><div class="row-left"><div class="row-icon">📦</div><div><div class="row-title">Order #${o.id}</div><div class="row-sub">${o.items} • ${o.date}</div></div></div>
+    <span class="badge ${o.status==='DELIVERED'?'badge-green':o.status==='IN TRANSIT'?'badge-blue':'badge-orange'}">${o.status}</span></div>`).join('');
+}
+renderRecentOrders();
+</script>
+</body>
+</html>

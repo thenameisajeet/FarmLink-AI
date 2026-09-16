@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Sell Crop</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="farmer-theme" data-page="sell-crop">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebarMount"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <h1 data-i18n="nav.sellCrop">Sell Crop</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn" id="langToggleBtn"><i data-lucide="languages"></i></button>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="page-card">
+        <div class="card-head"><div><h3 data-i18n="modal.sell.title">List your harvest</h3><p class="text-faint" style="font-size:12px;">Fill this out and your listing goes live to verified buyers.</p></div></div>
+        <form id="sellCropForm">
+          <div class="field">
+            <label data-i18n="modal.sell.crop">Crop</label>
+            <select name="crop"><option>Onion</option><option>Tomato</option><option>Grapes</option><option>Wheat</option></select>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="modal.sell.qty">Quantity (kg)</label><input type="number" name="qty" placeholder="5000" required></div>
+            <div class="field"><label data-i18n="modal.sell.price">Asking price /q</label><input type="text" name="price" placeholder="₹2,950" required></div>
+          </div>
+          <div class="field">
+            <label data-i18n="modal.sell.quality">Quality</label>
+            <div class="chip-group">
+              <button type="button" class="chip selected" onclick="selectChip(this.parentElement,'Grade A','quality')">Grade A</button>
+              <button type="button" class="chip" onclick="selectChip(this.parentElement,'Premium','quality')">Premium</button>
+              <button type="button" class="chip" onclick="selectChip(this.parentElement,'Grade B','quality')">Grade B</button>
+            </div>
+          </div>
+          <div class="field"><label data-i18n="modal.sell.from">Available from</label><input type="date" name="availfrom"></div>
+          <div class="field">
+            <label data-i18n="modal.sell.delivery">Delivery mode</label>
+            <div class="chip-group">
+              <button type="button" class="chip selected" onclick="selectChip(this.parentElement,'Buyer pickup','delivery')" data-i18n="modal.sell.pickup">Buyer pickup</button>
+              <button type="button" class="chip" onclick="selectChip(this.parentElement,'Platform logistics','delivery')" data-i18n="modal.sell.platform">Platform logistics</button>
+              <button type="button" class="chip" onclick="selectChip(this.parentElement,'Self delivery','delivery')" data-i18n="modal.sell.self">Self delivery</button>
+            </div>
+          </div>
+          <div class="field"><label data-i18n="modal.sell.packaging">Packaging details</label><textarea name="packaging" rows="2" placeholder="Jute bags, 50kg each"></textarea></div>
+          <button type="submit" class="btn btn-primary btn-block"><span data-i18n="modal.sell.publish">Publish to verified buyers</span> →</button>
+        </form>
+      </div>
+
+      <div>
+        <div class="page-card">
+          <h3 style="margin-bottom:10px;">Why this listing will perform</h3>
+          <div class="row-item"><span class="text-faint">Demand confidence</span><b class="badge badge-green">87%</b></div>
+          <div class="row-item"><span class="text-faint">Verified buyers watching onion</span><b>18</b></div>
+          <div class="row-item"><span class="text-faint">Suggested price band</span><b>₹2,950–₹3,050/q</b></div>
+          <p class="text-faint" style="font-size:11.5px;margin-top:10px;">Based on demo AI demand data — not a guaranteed buyer offer.</p>
+        </div>
+        <div class="page-card">
+          <h3 style="margin-bottom:10px;">Your recent listings</h3>
+          <div id="recentListingsPreview"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="langModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3 data-i18n="lang.title">Choose your language</h3><button class="modal-close" onclick="flCloseModal('langModal')">✕</button></div>
+    <div id="langOptionsWrap"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.getElementById('sellCropForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const f = e.target;
+
+  if(!f.crop.value || !f.qty.value || !f.price.value){
+    flToast('Please fill crop, quantity and price', 'error');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:5000/api/listings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        farmerId: '6aa96dcb80cc68a0dbb02fef',
+        crop: f.crop.value,
+        quality: flSelectedQuality,
+        quantityKg: Number(f.qty.value),
+        askingPricePerQuintal: Number(
+          f.price.value.replace(/[₹,]/g, '')
+        ),
+        availabilityDate: f.availfrom.value,
+        deliveryMode: flSelectedDelivery,
+        packagingDetails: f.packaging.value
+      })
+    });
+
+    const data = await response.json();
+
+    if(!data.success){
+      flToast(data.message || 'Failed to publish listing', 'error');
+      return;
+    }
+
+    flToast('Crop listed successfully');
+
+    setTimeout(() => {
+      window.location.href = 'listings.html';
+    }, 900);
+
+  } catch(error) {
+    console.error(error);
+    flToast('Could not connect to FarmLink backend', 'error');
+  }
+});
+
+
+function renderPreview(){
+  const listings = flStore.get('farmlink-listings', FL_DEFAULT_LISTINGS);
+  const icons = {
+    Onion:'🧅',
+    Tomato:'🍅',
+    Grapes:'🍇',
+    Wheat:'🌾'
+  };
+
+  document.getElementById('recentListingsPreview').innerHTML =
+    listings.slice(0,4).map(l => `
+      <div class="row-item">
+        <div class="row-left">
+          <div class="row-icon">${icons[l.crop] || '🌱'}</div>
+          <div>
+            <div class="row-title">${l.crop} • ${l.quality}</div>
+            <div class="row-sub">${(l.qty || l.quantityKg).toLocaleString()} kg</div>
+          </div>
+        </div>
+        <span class="badge badge-${
+          l.status === 'live'
+            ? 'green'
+            : l.status === 'negotiating'
+              ? 'orange'
+              : 'blue'
+        }">${l.status}</span>
+      </div>
+    `).join('') || '<p class="text-faint">No listings yet.</p>';
+}
+
+renderPreview();
+</script>
+</body>
+</html>

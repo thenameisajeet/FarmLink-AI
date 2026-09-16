@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Buyer Marketplace</title>
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="farmer-theme" data-page="marketplace">
+<div class="mobile-overlay"></div>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebarMount"></aside>
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+        <h1 data-i18n="nav.marketplace">Buyer Marketplace</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeToggleBtn"><span id="themeIcon"></span></button>
+        <button class="icon-btn" id="langToggleBtn"><i data-lucide="languages"></i></button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="tabs" id="cropTabs">
+        <button class="tab-btn active" data-crop="all">All crops</button>
+        <button class="tab-btn" data-crop="Onion">Onion</button>
+        <button class="tab-btn" data-crop="Tomato">Tomato</button>
+        <button class="tab-btn" data-crop="Grapes">Grapes</button>
+        <button class="tab-btn" data-crop="Wheat">Wheat</button>
+      </div>
+      <div class="search-box" style="max-width:280px;">
+        <i data-lucide="search" style="width:15px;height:15px;"></i>
+        <input id="marketSearch" placeholder="Search buyers or regions...">
+      </div>
+    </div>
+
+    <div class="grid grid-3" id="requirementGrid"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="reqModal">
+  <div class="modal" id="reqModalBody"></div>
+</div>
+<div class="modal-overlay" id="langModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3 data-i18n="lang.title">Choose your language</h3><button class="modal-close" onclick="flCloseModal('langModal')">✕</button></div>
+    <div id="langOptionsWrap"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+<script>
+let REQUIREMENTS = [];
+let selectedCrop = 'all';
+
+async function loadRequirements() {
+  try {
+    const response = await fetch('http://localhost:5000/api/requirements');
+    const data = await response.json();
+
+    console.log('CONNECTION RESPONSE:', data);
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to load requirements');
+    }
+
+    REQUIREMENTS = data.requirements || [];
+    renderRequirements();
+
+  } catch (error) {
+    console.error('Requirements loading failed:', error);
+
+    document.getElementById('requirementGrid').innerHTML =
+      '<div class="empty-state">Unable to load buyer requirements.</div>';
+  }
+}
+
+function renderRequirements() {
+  const q = document.getElementById('marketSearch').value.toLowerCase();
+
+  const list = REQUIREMENTS.filter(r =>
+    (selectedCrop === 'all' || r.crop === selectedCrop) &&
+    (
+      (r.buyerId?.name || '').toLowerCase().includes(q) ||
+      (r.region || '').toLowerCase().includes(q) ||
+      (r.crop || '').toLowerCase().includes(q)
+    )
+  );
+
+  document.getElementById('requirementGrid').innerHTML =
+    list.map(r => `
+      <div class="card">
+
+        <div class="flex" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div>
+            <div class="row-title">${r.buyerId?.name || 'Buyer'}</div>
+            <div class="row-sub">${r.region || 'Region not specified'}</div>
+          </div>
+
+          <span class="badge badge-green">
+            ${r.status || 'OPEN'}
+          </span>
+        </div>
+
+        <div class="row-item" style="padding:6px 0;">
+          <span class="text-faint">Crop</span>
+          <b>${r.crop} • ${r.quality}</b>
+        </div>
+
+        <div class="row-item" style="padding:6px 0;">
+          <span class="text-faint">Quantity</span>
+          <b>${Number(r.requiredQuantityKg).toLocaleString()} kg</b>
+        </div>
+
+        <div class="row-item" style="padding:6px 0;">
+          <span class="text-faint">Offer</span>
+          <b>₹${Number(r.minPrice).toLocaleString()}–₹${Number(r.maxPrice).toLocaleString()}/q</b>
+        </div>
+
+        <button
+          class="btn btn-ghost btn-block"
+          style="margin-top:10px;"
+          onclick="viewRequirement('${r._id}')">
+          View Requirement
+        </button>
+
+      </div>
+    `).join('') ||
+    '<div class="empty-state">No matching buyer requirements.</div>';
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function viewRequirement(id) {
+  const r = REQUIREMENTS.find(x => x._id === id);
+
+  if (!r) return;
+
+  document.getElementById('reqModalBody').innerHTML = `
+
+    <div class="modal-head">
+      <h3>${r.buyerId?.name || 'Buyer'}</h3>
+
+      <button
+        class="modal-close"
+        onclick="closeRequirement()">
+        ✕
+      </button>
+    </div>
+
+    <div class="row-item">
+      <span class="text-faint">Region</span>
+      <b>${r.region || 'Not specified'}</b>
+    </div>
+
+    <div class="row-item">
+      <span class="text-faint">Crop needed</span>
+      <b>${r.crop} • ${r.quality}</b>
+    </div>
+
+    <div class="row-item">
+      <span class="text-faint">Quantity</span>
+      <b>${Number(r.requiredQuantityKg).toLocaleString()} kg</b>
+    </div>
+
+    <div class="row-item">
+      <span class="text-faint">Offer range</span>
+      <b>₹${Number(r.minPrice).toLocaleString()}–₹${Number(r.maxPrice).toLocaleString()}/q</b>
+    </div>
+
+    <div class="row-item">
+      <span class="text-faint">Status</span>
+      <b>${r.status}</b>
+    </div>
+
+    <button
+      class="btn btn-primary btn-block"
+      style="margin-top:14px;"
+      onclick="connectFromModal('${r._id}')">
+      Connect With Buyer →
+    </button>
+  `;
+
+  flOpenModal('reqModal');
+}
+
+function closeRequirement() {
+  flCloseModal('reqModal');
+}
+
+async function connectBuyer(id) {
+  const r = REQUIREMENTS.find(x => x._id === id);
+
+  if (!r) return;
+
+  const response = await fetch('http://localhost:5000/api/connections', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      farmerId: '6aa96dcb80cc68a0dbb02fef',
+      buyerId: r.buyerId?._id,
+      listingId: '6aa9707778ca04b8f6736e1b',
+      requirementId: r._id,
+      status: 'REQUESTED'
+    })
+  });
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.message || 'Connection failed');
+  }
+
+  flToast(`Connection request sent to ${r.buyerId?.name || 'buyer'}`);
+}
+
+async function connectFromModal(id) {
+  try {
+    await connectBuyer(id);
+    closeRequirement();
+  } catch (error) {
+    console.error(error);
+    flToast('Could not send connection request', 'error');
+  }
+}
+
+document.getElementById('cropTabs').addEventListener('click', e => {
+  if (!e.target.matches('.tab-btn')) return;
+
+  document.querySelectorAll('#cropTabs .tab-btn')
+    .forEach(b => b.classList.remove('active'));
+
+  e.target.classList.add('active');
+
+  selectedCrop = e.target.dataset.crop;
+
+  renderRequirements();
+});
+
+document.getElementById('marketSearch')
+  .addEventListener('input', renderRequirements);
+
+loadRequirements();
+</script>
+</body>
+</html>

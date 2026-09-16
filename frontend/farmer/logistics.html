@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FarmLink AI — Logistics</title>
+
+<link rel="stylesheet" href="../shared/base.css">
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body class="farmer-theme" data-page="logistics">
+
+<div class="mobile-overlay"></div>
+
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebarMount"></aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="hamburger icon-btn" id="hamburgerBtn">
+          <i data-lucide="menu"></i>
+        </button>
+
+        <h1 data-i18n="nav.logistics">Logistics</h1>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeToggleBtn">
+          <span id="themeIcon"></span>
+        </button>
+
+        <button class="icon-btn" id="langToggleBtn">
+          <i data-lucide="languages"></i>
+        </button>
+      </div>
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="grid grid-3">
+
+      <div class="stat-card">
+        <div class="label">
+          Active shipments
+          <i data-lucide="truck"></i>
+        </div>
+
+        <div class="value" id="activeShipments">0</div>
+
+        <div class="sub">Currently moving</div>
+      </div>
+
+
+      <div class="stat-card">
+        <div class="label">
+          On-time rate
+          <i data-lucide="clock"></i>
+        </div>
+
+        <div class="value">96.2%</div>
+
+        <div class="sub up">Last 30 days</div>
+      </div>
+
+
+      <div class="stat-card">
+        <div class="label">
+          Avg. cost saved
+          <i data-lucide="indian-rupee"></i>
+        </div>
+
+        <div class="value">14.6%</div>
+
+        <div class="sub">Vs. direct solo transport</div>
+      </div>
+
+    </div>
+
+
+    <!-- SHIPMENT TRACKER -->
+
+    <div class="page-card" style="margin-top:16px;">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <h3 style="margin:0;">Shipment tracker</h3>
+
+        <button class="btn btn-primary" onclick="createShipment()">
+          + Create Shipment
+        </button>
+      </div>
+
+      <div id="shipmentList">
+        <div class="row-item">
+          <span class="text-faint">Loading shipments...</span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- CONSOLIDATION NETWORK -->
+
+    <div class="page-card">
+
+      <h3 style="margin-bottom:10px;">
+        Nearby consolidation network
+      </h3>
+
+      <div class="row-item">
+        <span class="text-faint">
+          Chhatrapati Sambhaji Nagar hub
+        </span>
+
+        <span class="badge badge-green">
+          Active
+        </span>
+      </div>
+
+      <div class="row-item">
+        <span class="text-faint">
+          Jalna collection center
+        </span>
+
+        <span class="badge badge-green">
+          Active
+        </span>
+      </div>
+
+      <div class="row-item">
+        <span class="text-faint">
+          Ahmednagar hub
+        </span>
+
+        <span class="badge badge-gray">
+          Low activity
+        </span>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+
+<!-- LANGUAGE MODAL -->
+
+<div class="modal-overlay" id="langModal">
+
+  <div class="modal" style="max-width:400px;">
+
+    <div class="modal-head">
+
+      <h3 data-i18n="lang.title">
+        Choose your language
+      </h3>
+
+      <button
+        class="modal-close"
+        onclick="flCloseModal('langModal')">
+        ✕
+      </button>
+
+    </div>
+
+    <div id="langOptionsWrap"></div>
+
+  </div>
+
+</div>
+
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../shared/shared.js"></script>
+<script src="js/app.js"></script>
+
+
+<!-- LOGISTICS API -->
+
+<script>
+
+async function loadShipments() {
+
+  try {
+
+    const response = await fetch(
+      'http://localhost:5000/api/shipments'
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error('Failed to load shipments');
+    }
+
+
+    const shipments = data.shipments || [];
+
+    document.getElementById('activeShipments').textContent =
+      shipments.filter(s =>
+        s.status === 'PENDING' ||
+        s.status === 'ASSIGNED' ||
+        s.status === 'IN TRANSIT'
+      ).length;
+
+
+    const list = document.getElementById('shipmentList');
+
+    if (!shipments.length) {
+
+      list.innerHTML = `
+        <div class="row-item">
+          <span class="text-faint">
+            No shipments yet.
+          </span>
+        </div>
+      `;
+
+      return;
+    }
+
+
+    list.innerHTML = shipments.map(shipment => {
+
+      const orderNumber =
+        shipment.orderId?.orderNumber || 'Shipment';
+
+      const status =
+        shipment.status || 'PENDING';
+
+
+      let badgeClass = 'badge-gray';
+
+      if (status === 'IN TRANSIT') {
+        badgeClass = 'badge-blue';
+      }
+
+      if (status === 'DELIVERED') {
+        badgeClass = 'badge-green';
+      }
+
+      if (status === 'ASSIGNED') {
+        badgeClass = 'badge-orange';
+      }
+
+
+      return `
+        <div class="row-item">
+
+          <div class="row-left">
+
+            <div class="row-icon">
+              🚚
+            </div>
+
+            <div>
+
+              <div class="row-title">
+                ${orderNumber} → ${shipment.deliveryLocation}
+              </div>
+
+              <div class="row-sub">
+                ${Number(shipment.quantityKg).toLocaleString()} kg
+                • Pickup: ${shipment.pickupLocation}
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="badge ${badgeClass}">
+            ${status}
+          </span>
+
+        </div>
+      `;
+
+    }).join('');
+
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      'Shipment loading failed:',
+      error
+    );
+
+    document.getElementById('shipmentList').innerHTML = `
+      <div class="row-item">
+        <span class="text-faint">
+          Unable to load shipments.
+        </span>
+      </div>
+    `;
+
+  }
+
+}
+
+
+loadShipments();
+
+async function createShipment() {
+  try {
+    const response = await fetch('http://localhost:5000/api/shipments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        orderId: '6aa977c38dd959ef8e15fa17',
+        pickupLocation: 'Chhatrapati Sambhaji Nagar',
+        consolidationPoint: 'Chhatrapati Sambhaji Nagar hub',
+        deliveryLocation: 'Mumbai',
+        vehicleId: 'FL-TRUCK-01',
+        driverId: 'DRIVER-001',
+        quantityKg: 3000,
+        status: 'PENDING'
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to create shipment');
+    }
+
+    alert('Shipment created successfully!');
+    loadShipments();
+
+  } catch (error) {
+    console.error(error);
+    alert('Could not create shipment.');
+  }
+}
+
+</script>
+
+</body>
+</html>
