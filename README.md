@@ -65,4 +65,3 @@ backend/                empty — future phase
 4. Real demand-forecast model behind `/api/forecast`.
 
 
-<!-- GitDoc auto-sync test -->
