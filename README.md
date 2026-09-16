@@ -63,3 +63,6 @@ backend/                empty — future phase
 2. Stand up `backend/` (auth, listings, orders as real endpoints).
 3. Replace localStorage reads/writes with API calls, same function names so front-end barely changes.
 4. Real demand-forecast model behind `/api/forecast`.
+
+
+<!-- GitDoc auto-sync test -->
