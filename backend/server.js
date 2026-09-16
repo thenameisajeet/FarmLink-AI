@@ -12,6 +12,16 @@ require('dotenv').config();
 const app = express();
 const PORT = 5000;
 
+const path = require('path');
+
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+app.get('/', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, '../frontend/farmer/index.html')
+  );
+});
+
 const listingRoutes = require('./routes/listings');
 const authRoutes = require('./routes/auth');
 const requirementRoutes = require('./routes/requirements');
@@ -46,10 +56,9 @@ app.use(
 /* ---------- Basic Route ---------- */
 
 app.get('/', (req, res) => {
-  res.json({
-    message: 'FarmLink AI backend is running',
-    status: 'success'
-  });
+  res.sendFile(
+    path.join(__dirname, '../frontend/farmer/index.html')
+  );
 });
 
 
