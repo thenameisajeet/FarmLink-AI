@@ -56,9 +56,7 @@ app.use(
 /* ---------- Basic Route ---------- */
 
 app.get('/', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, '../frontend/farmer/index.html')
-  );
+  res.redirect('/farmer/index.html');
 });
 
 
